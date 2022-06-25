@@ -1,0 +1,23 @@
+{
+    "name": "slbotext",
+    "version": "0.1.0",
+    "description": "Slitherio bot",
+    "private": true,
+    "scripts": {
+        "start": "npx webpack --watch"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/stacksparrow4/slbotext.git"
+    },
+    "author": "stacksparrow4, ryno8, a-jason-liu21",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/stacksparrow4/slbotext/issues"
+    },
+    "homepage": "https://github.com/stacksparrow4/slbotext#readme",
+    "devDependencies": {
+        "webpack": "^5.73.0",
+        "webpack-cli": "^4.10.0"
+    }
+}

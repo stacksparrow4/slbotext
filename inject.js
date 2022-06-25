@@ -1,6 +1,6 @@
 window.onload = () => {
     var s = document.createElement("script");
-    s.src = chrome.runtime.getURL("bot.user.js");
+    s.src = chrome.runtime.getURL("dist/bot.js");
     s.onload = function () {
         this.remove();
     };

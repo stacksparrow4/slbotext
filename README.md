@@ -4,7 +4,12 @@ in a self contained chrome extension.
 ## How to run
 
 1. Clone repo
-2. Go to [chrome://extensions/](chrome://extensions/)
-3. Turn on developer mode
-4. Select load unpacked and choose this folder
-5. Go to [http://slither.io/](http://slither.io/)
+2. Run `npm install` to install dependencies
+3. Run `npm start` to start build process
+4. Go to [chrome://extensions/](chrome://extensions/)
+5. Turn on developer mode
+6. Select load unpacked and choose this folder
+7. Go to [http://slither.io/](http://slither.io/)
+
+From now on you just need to ensure the build process is running (if not, `npm start`), and then press the refresh icon next to the extension
+in [chrome://extensions/](chrome://extensions/) to see any changes (**IMPORTANT**).
