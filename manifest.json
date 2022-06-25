@@ -1,0 +1,21 @@
+{
+    "manifest_version": 3,
+    "name": "Slitherio bot extension",
+    "version": "0.1.0",
+
+    "description": "Slitherio bot",
+
+    "content_scripts": [
+        {
+            "matches": ["http://slither.io/"],
+            "js": ["inject.js"]
+        }
+    ],
+
+    "web_accessible_resources": [
+        {
+            "resources": ["bot.user.js"],
+            "matches": ["<all_urls>"]
+        }
+    ]
+}
