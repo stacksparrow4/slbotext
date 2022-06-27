@@ -17,5 +17,17 @@
             "resources": ["dist/bot.js"],
             "matches": ["<all_urls>"]
         }
-    ]
+    ],
+
+    "action": {
+        "default_popup": "hot-reload/popup.html"
+    },
+
+    "permissions": ["storage"],
+
+    "background": {
+        "service_worker": "hot-reload/background.js"
+    },
+
+    "host_permissions": ["http://localhost:9001/*"]
 }
