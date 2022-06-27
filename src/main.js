@@ -24,7 +24,7 @@ userInterface.loadPreference("visualDebugging", false);
 userInterface.loadPreference("autoRespawn", false);
 userInterface.loadPreference("mobileRender", false);
 userInterface.loadPreference("leaderboard", true);
-window.nick.value = userInterface.loadPreference("savedNick", "Slither.io-bot");
+window.nick.value = "Ryan :D";
 
 // Don't load saved options or apply custom options if
 // the user wants to use default options

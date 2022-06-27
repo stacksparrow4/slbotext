@@ -158,15 +158,8 @@ const userInterface = {
 
     // Saves username when you click on "Play" button
     playButtonClickListener: function () {
-        userInterface.saveNick();
         userInterface.loadPreference("autoRespawn", false);
         userInterface.onPrefChange();
-    },
-
-    // Preserve nickname
-    saveNick: function () {
-        var nick = document.getElementById("nick").value;
-        userInterface.savePreference("savedNick", nick);
     },
 
     // Hide top score
@@ -270,10 +263,6 @@ const userInterface = {
             // 'ESC' to quickly respawn
             if (e.keyCode === 27) {
                 bot.quickRespawn();
-            }
-            // Save nickname when you press "Enter"
-            if (e.keyCode === 13) {
-                userInterface.saveNick();
             }
             userInterface.onPrefChange();
         }

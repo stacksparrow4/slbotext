@@ -11,5 +11,4 @@ in a self contained chrome extension.
 6. Select load unpacked and choose this folder
 7. Go to [http://slither.io/](http://slither.io/)
 
-From now on you just need to ensure the build process is running (if not, `npm start`), and then press the refresh icon next to the extension
-in [chrome://extensions/](chrome://extensions/) to see any changes (**IMPORTANT**).
+From now on you just need to ensure the build process is running (if not, `npm start`). Refresh the slither.io page to see any changes you make.
