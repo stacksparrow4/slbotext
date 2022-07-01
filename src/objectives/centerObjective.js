@@ -2,6 +2,8 @@ import canvasUtil from "../canvasUtil.js";
 // template goal which makes the snake tend towards the center
 
 const centerObjective = {
+    name: "CENTER",
+
     getAction: () => {
         return { target_x: 20000, target_y: 20000, boost: false };
     },

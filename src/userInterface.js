@@ -396,6 +396,9 @@ const userInterface = {
                 }
             }
 
+            // Display bot objective
+            oContent.push("Objective: " + bot.currentObjectiveName);
+
             if (
                 window.bso !== undefined &&
                 userInterface.overlays.serverOverlay.innerHTML !==

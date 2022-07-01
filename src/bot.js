@@ -15,6 +15,7 @@ const bot = {
     defaultAccel: 0,
     sectorBox: {},
     currentFood: {},
+    currentObjectiveName: "",
     opt: {
         // These are the bot's default options
         // If you wish to customise these, use
@@ -627,8 +628,12 @@ const bot = {
     go: function () {
         objectives.forEach((x) => x.drawDebug());
         const priorities = objectives.map((x) => x.getPriority());
-        const { target_x, target_y, boost } =
-            objectives[priorities.indexOf(Math.max(...priorities))].getAction();
+        const currentObjective =
+            objectives[priorities.indexOf(Math.max(...priorities))];
+
+        bot.currentObjectiveName = currentObjective.name;
+
+        const { target_x, target_y, boost } = currentObjective.getAction();
 
         window.setAcceleration(boost);
         canvasUtil.setMouseCoordinates(
