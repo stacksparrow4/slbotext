@@ -1,7 +1,8 @@
 import canvasUtil from "./canvasUtil";
+import avoidObjective from "./objectives/avoidObjective";
 import centerObjective from "./objectives/centerObjective";
 
-const objectives = [centerObjective];
+const objectives = [centerObjective, avoidObjective];
 
 const bot = {
     isBotRunning: false,
@@ -590,7 +591,8 @@ const bot = {
             bot.sectorBoxSide,
             bot.sectorBoxSide
         );
-        // if (window.visualDebugging) canvasUtil.drawRect(bot.sectorBox, '#c0c0c0', true, 0.1);
+        if (window.visualDebugging)
+            canvasUtil.drawRect(bot.sectorBox, "#c0c0c0", true, 0.1);
 
         bot.cos = Math.cos(window.snake.ang);
         bot.sin = Math.sin(window.snake.ang);
@@ -639,8 +641,9 @@ const bot = {
         canvasUtil.setMouseCoordinates(
             canvasUtil.mapToMouse(canvasUtil.point(target_x, target_y))
         );
+
+        bot.every();
         /*
-    bot.every();
 
     if (bot.checkCollision()) {
       bot.lookForFood = false;
