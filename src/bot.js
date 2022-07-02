@@ -1,9 +1,10 @@
 import canvasUtil from "./canvasUtil";
+import avoidObjective from "./objectives/avoidObjective";
 import centerObjective from "./objectives/centerObjective";
 import oldObjective from "./objectives/oldObjective";
 import ryanObjective from "./objectives/ryanObjective";
 
-const objectives = [centerObjective, oldObjective, ryanObjective];
+const objectives = [avoidObjective, centerObjective, oldObjective, ryanObjective];
 
 const bot = {
     isBotRunning: false,
@@ -592,7 +593,8 @@ const bot = {
             bot.sectorBoxSide,
             bot.sectorBoxSide
         );
-        // if (window.visualDebugging) canvasUtil.drawRect(bot.sectorBox, '#c0c0c0', true, 0.1);
+        if (window.visualDebugging)
+            canvasUtil.drawRect(bot.sectorBox, "#c0c0c0", true, 0.1);
 
         bot.cos = Math.cos(window.snake.ang);
         bot.sin = Math.sin(window.snake.ang);

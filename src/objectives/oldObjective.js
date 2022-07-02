@@ -14,7 +14,7 @@ const oldObjective = {
     },
 
     getPriority: (bot) => {
-        return 100;
+        return -100;
     },
 
     drawDebug: (bot) => {
