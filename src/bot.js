@@ -4,7 +4,8 @@ import centerObjective from "./objectives/centerObjective";
 import oldObjective from "./objectives/oldObjective";
 import ryanObjective from "./objectives/ryanObjective";
 
-const objectives = [avoidObjective, centerObjective, oldObjective, ryanObjective];
+//const objectives = [avoidObjective, centerObjective, oldObjective, ryanObjective];
+const objectives = [ryanObjective];
 
 const bot = {
     isBotRunning: false,
