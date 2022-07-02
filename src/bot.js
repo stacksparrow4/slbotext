@@ -4,7 +4,12 @@ import centerObjective from "./objectives/centerObjective";
 import oldObjective from "./objectives/oldObjective";
 import ryanObjective from "./objectives/ryanObjective";
 
-const objectives = [avoidObjective, centerObjective, oldObjective, ryanObjective];
+const objectives = [
+    avoidObjective,
+    centerObjective,
+    oldObjective,
+    ryanObjective,
+];
 
 const bot = {
     isBotRunning: false,
@@ -643,6 +648,8 @@ const bot = {
         canvasUtil.setMouseCoordinates(
             canvasUtil.mapToMouse(canvasUtil.point(target_x, target_y))
         );
+
+        bot.every();
     },
 };
 

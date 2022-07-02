@@ -7,10 +7,13 @@ const oldObjective = {
     name: "THE METHOD USED BY THE ORIGINAL BOT",
 
     getAction: (bot) => {
-        bot.every();
         const boost = !bot.checkCollision() && bot.foodAccel();
         bot.computeFoodGoal();
-        return {  target_x: bot.currentFood.x,  target_y: bot.currentFood.y, boost: boost };
+        return {
+            target_x: bot.currentFood.x,
+            target_y: bot.currentFood.y,
+            boost: boost,
+        };
     },
 
     getPriority: (bot) => {
