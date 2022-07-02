@@ -1,7 +1,9 @@
 import canvasUtil from "./canvasUtil";
 import centerObjective from "./objectives/centerObjective";
+import oldObjective from "./objectives/oldObjective";
+import ryanObjective from "./objectives/ryanObjective";
 
-const objectives = [centerObjective];
+const objectives = [centerObjective, oldObjective, ryanObjective];
 
 const bot = {
     isBotRunning: false,
@@ -626,58 +628,19 @@ const bot = {
 
     // Main bot
     go: function () {
-        objectives.forEach((x) => x.drawDebug());
-        const priorities = objectives.map((x) => x.getPriority());
+        objectives.forEach((x) => x.drawDebug(bot));
+        const priorities = objectives.map((x) => x.getPriority(bot));
         const currentObjective =
             objectives[priorities.indexOf(Math.max(...priorities))];
 
         bot.currentObjectiveName = currentObjective.name;
 
-        const { target_x, target_y, boost } = currentObjective.getAction();
+        const { target_x, target_y, boost } = currentObjective.getAction(bot);
 
         window.setAcceleration(boost);
         canvasUtil.setMouseCoordinates(
             canvasUtil.mapToMouse(canvasUtil.point(target_x, target_y))
         );
-        /*
-    bot.every();
-
-    if (bot.checkCollision()) {
-      bot.lookForFood = false;
-      if (bot.foodTimeout) {
-        window.clearTimeout(bot.foodTimeout);
-        bot.foodTimeout = window.setTimeout(
-          bot.foodTimer,
-          (1000 / bot.opt.targetFps) * bot.opt.foodFrames
-        );
-      }
-    } else {
-      bot.lookForFood = true;
-      if (bot.foodTimeout === undefined) {
-        bot.foodTimeout = window.setTimeout(
-          bot.foodTimer,
-          (1000 / bot.opt.targetFps) * bot.opt.foodFrames
-        );
-      }
-      window.setAcceleration(bot.foodAccel());
-    }*/
-    },
-
-    // Timer version of food check
-    foodTimer: function () {
-        if (
-            window.playing &&
-            bot.lookForFood &&
-            window.snake !== null &&
-            window.snake.alive_amt === 1
-        ) {
-            bot.computeFoodGoal();
-            window.goalCoordinates = bot.currentFood;
-            canvasUtil.setMouseCoordinates(
-                canvasUtil.mapToMouse(window.goalCoordinates)
-            );
-        }
-        bot.foodTimeout = undefined;
     },
 };
 
