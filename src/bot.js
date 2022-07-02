@@ -591,8 +591,8 @@ const bot = {
             bot.sectorBoxSide,
             bot.sectorBoxSide
         );
-        if (window.visualDebugging)
-            canvasUtil.drawRect(bot.sectorBox, "#c0c0c0", true, 0.1);
+        // if (window.visualDebugging)
+        //     canvasUtil.drawRect(bot.sectorBox, "#c0c0c0", true, 0.1);
 
         bot.cos = Math.cos(window.snake.ang);
         bot.sin = Math.sin(window.snake.ang);

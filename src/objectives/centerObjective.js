@@ -14,7 +14,7 @@ const centerObjective = {
     },
 
     drawDebug: () => {
-        const p1 = canvasUtil.point(20000, 20000);
+        const p1 = canvasUtil.point(bot.MID_X, bot.MID_Y);
         const p2 = canvasUtil.point(window.snake.xx, window.snake.yy);
         canvasUtil.drawLine(p1, p2, "#FFFFFF", 5);
         return;

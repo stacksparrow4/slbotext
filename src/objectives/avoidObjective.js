@@ -31,12 +31,13 @@ const getSnakes = () => {
 
 const HEAD_DISTANCE_FACTOR = 30000;
 const BODY_DISTANCE_FACTOR = 3000;
+const BASE_RAD = 15;
 
 const ENABLE_THRESHOLD = 0.005;
 
 const DEBUG_GAP = 50;
 const DEBUG_RAD = DEBUG_GAP * 10;
-const DEBUG_NORM = 1;
+const DEBUG_NORM = 2;
 const DEBUG_SHOW_AHEAD = 20;
 const DEBUG_RAY_LEN = 10;
 
@@ -46,10 +47,12 @@ const getPointGradientFunction = () => {
     return (x, y) => {
         return snakes
             .map((s) => {
+                const size_factor = s.radius / BASE_RAD;
+
                 const distance_from_head =
                     Math.pow(s.x - x, 2) + Math.pow(s.y - y, 2);
                 const head_value = Math.exp(
-                    -distance_from_head / HEAD_DISTANCE_FACTOR
+                    -distance_from_head / (HEAD_DISTANCE_FACTOR * size_factor)
                 );
                 const partial_x =
                     head_value * ((-2 * (x - s.x)) / HEAD_DISTANCE_FACTOR);
@@ -61,7 +64,8 @@ const getPointGradientFunction = () => {
                         const distance_from_seg =
                             Math.pow(seg.x - x, 2) + Math.pow(seg.y - y, 2);
                         const seg_val = Math.exp(
-                            -distance_from_seg / BODY_DISTANCE_FACTOR
+                            -distance_from_seg /
+                                (BODY_DISTANCE_FACTOR * size_factor)
                         );
                         const partial_x =
                             seg_val *
@@ -137,37 +141,37 @@ const avoidObjective = {
     },
 
     drawDebug: () => {
-        // const evalFunction = getEvaluationFunction();
-
-        // const startX = window.snake.xx - DEBUG_RAD;
-        // const endX = window.snake.xx + DEBUG_RAD;
-        // const startY = window.snake.yy - DEBUG_RAD;
-        // const endY = window.snake.yy + DEBUG_RAD;
-
-        // const cachedVals = [];
-        // for (let x = startX; x <= endX; x += DEBUG_GAP) {
-        //     for (let y = startY; y <= endY; y += DEBUG_GAP) {
-        //         cachedVals.push(evalFunction(x, y));
-        //     }
-        // }
-
-        // let i = 0;
-        // for (let x = startX; x <= endX; x += DEBUG_GAP) {
-        //     for (let y = startY; y <= endY; y += DEBUG_GAP) {
-        //         const col = Math.min(
-        //             Math.floor((255 * cachedVals[i]) / DEBUG_NORM),
-        //             255
-        //         );
-        //         canvasUtil.drawCircle(
-        //             { x, y },
-        //             `rgb(${col}, ${col}, ${col})`,
-        //             true
-        //         );
-        //         i++;
-        //     }
-        // }
-
         const gradFunc = getPointGradientFunction();
+
+        if (window.visualDebugging) {
+            const startX = window.snake.xx - DEBUG_RAD;
+            const endX = window.snake.xx + DEBUG_RAD;
+            const startY = window.snake.yy - DEBUG_RAD;
+            const endY = window.snake.yy + DEBUG_RAD;
+
+            const cachedVals = [];
+            for (let x = startX; x <= endX; x += DEBUG_GAP) {
+                for (let y = startY; y <= endY; y += DEBUG_GAP) {
+                    cachedVals.push(gradFunc(x, y).val);
+                }
+            }
+
+            let i = 0;
+            for (let x = startX; x <= endX; x += DEBUG_GAP) {
+                for (let y = startY; y <= endY; y += DEBUG_GAP) {
+                    const col = Math.min(
+                        Math.floor((255 * cachedVals[i]) / DEBUG_NORM),
+                        255
+                    );
+                    canvasUtil.drawCircle(
+                        { x, y },
+                        `rgb(${col}, ${col}, ${col})`,
+                        true
+                    );
+                    i++;
+                }
+            }
+        }
 
         let prev_x = window.snake.xx;
         let prev_y = window.snake.yy;
