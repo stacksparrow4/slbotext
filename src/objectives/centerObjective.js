@@ -9,7 +9,7 @@ const centerObjective = {
         return { target_x: bot.MID_X, target_y: bot.MID_Y, boost: false };
     },
 
-    getPriority: () => {
+    getPriority: (bot) => {
         return 0;
     },
 
