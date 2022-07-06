@@ -3,14 +3,14 @@ import anticircleObjective from "./objectives/anticircleObjective";
 import avoidObjective from "./objectives/avoidObjective";
 import centerObjective from "./objectives/centerObjective";
 import oldObjective from "./objectives/oldObjective";
-import ryanObjective from "./objectives/ryanObjective";
+import foodObjective from "./objectives/foodObjective";
 
 const objectives = [
     avoidObjective,
     centerObjective,
     oldObjective,
-    ryanObjective,
     anticircleObjective,
+    foodObjective,
 ];
 
 const bot = {
@@ -637,6 +637,8 @@ const bot = {
 
     // Main bot
     go: function () {
+        bot.every();
+
         objectives.forEach((x) => x.drawDebug(bot));
         const priorities = objectives.map((x) => x.getPriority(bot));
         const currentObjective =
@@ -650,8 +652,6 @@ const bot = {
         canvasUtil.setMouseCoordinates(
             canvasUtil.mapToMouse(canvasUtil.point(target_x, target_y))
         );
-
-        bot.every();
     },
 };
 
