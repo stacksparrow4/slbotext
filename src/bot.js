@@ -2,14 +2,12 @@ import canvasUtil from "./canvasUtil";
 import avoidObjective from "./objectives/avoidObjective";
 import centerObjective from "./objectives/centerObjective";
 import oldObjective from "./objectives/oldObjective";
-import ryanObjective from "./objectives/ryanObjective";
 import foodObjective from "./objectives/foodObjective";
 
 const objectives = [
     avoidObjective,
     centerObjective,
     oldObjective,
-    ryanObjective,
     foodObjective,
 ];
 
