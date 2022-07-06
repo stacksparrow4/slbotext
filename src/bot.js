@@ -1,4 +1,5 @@
 import canvasUtil from "./canvasUtil";
+import anticircleObjective from "./objectives/anticircleObjective";
 import avoidObjective from "./objectives/avoidObjective";
 import centerObjective from "./objectives/centerObjective";
 import oldObjective from "./objectives/oldObjective";
@@ -9,6 +10,7 @@ const objectives = [
     centerObjective,
     oldObjective,
     ryanObjective,
+    anticircleObjective,
 ];
 
 const bot = {
