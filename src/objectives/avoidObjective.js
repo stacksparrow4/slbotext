@@ -1,33 +1,5 @@
-import bot from "../bot.js";
 import canvasUtil from "../canvasUtil.js";
-
-// Helper function to get info about other snakes.
-// Mainly just cleaning up the mess that is the snakes array
-const getSnakes = () => {
-    const alive_snakes = window.snakes.filter(
-        (s) => s.alive_amt === 1 && s.id !== window.snake.id
-    );
-
-    return alive_snakes.map((s) => ({
-        // Head is at s.xx, s.yy
-        x: s.xx,
-        y: s.yy,
-        radius: bot.getSnakeWidth(s.sc) / 2,
-        segments: s.pts
-            .filter(
-                (p) =>
-                    !p.dying &&
-                    canvasUtil.pointInRect(
-                        {
-                            x: p.xx,
-                            y: p.yy,
-                        },
-                        bot.sectorBox
-                    )
-            )
-            .map((p) => ({ x: p.xx, y: p.yy })),
-    }));
-};
+import { getSnakes } from "./util";
 
 const HEAD_DISTANCE_FACTOR = 30000;
 const BODY_DISTANCE_FACTOR = 3000;
@@ -112,10 +84,14 @@ const getPointGradientFunction = () => {
 const avoidObjective = {
     name: "AVOID",
 
-    getAction: () => {
-        const gradFunc = getPointGradientFunction();
+    gradFunc: null,
 
-        const dirGrad = gradFunc(window.snake.xx, window.snake.yy);
+    tick: function () {
+        this.gradFunc = getPointGradientFunction();
+    },
+
+    getAction: function () {
+        const dirGrad = this.gradFunc(window.snake.xx, window.snake.yy);
 
         const len = Math.sqrt(
             Math.pow(dirGrad.dx, 2) + Math.pow(dirGrad.dy, 2)
@@ -130,19 +106,15 @@ const avoidObjective = {
         };
     },
 
-    getPriority: () => {
-        const gradFunc = getPointGradientFunction();
-
-        const { val } = gradFunc(window.snake.xx, window.snake.yy);
+    getPriority: function () {
+        const { val } = this.gradFunc(window.snake.xx, window.snake.yy);
 
         if (val >= ENABLE_THRESHOLD) return 1;
 
         return -1;
     },
 
-    drawDebug: () => {
-        const gradFunc = getPointGradientFunction();
-
+    drawDebug: function () {
         if (window.visualDebugging) {
             const startX = window.snake.xx - DEBUG_RAD;
             const endX = window.snake.xx + DEBUG_RAD;
@@ -152,7 +124,7 @@ const avoidObjective = {
             const cachedVals = [];
             for (let x = startX; x <= endX; x += DEBUG_GAP) {
                 for (let y = startY; y <= endY; y += DEBUG_GAP) {
-                    cachedVals.push(gradFunc(x, y).val);
+                    cachedVals.push(this.gradFunc(x, y).val);
                 }
             }
 
@@ -177,7 +149,7 @@ const avoidObjective = {
         let prev_y = window.snake.yy;
 
         for (let i = 0; i < DEBUG_SHOW_AHEAD; i++) {
-            const dirGrad = gradFunc(prev_x, prev_y);
+            const dirGrad = this.gradFunc(prev_x, prev_y);
 
             if (i === 0 && dirGrad.val < ENABLE_THRESHOLD) {
                 // We are not enabled, dont show visual
