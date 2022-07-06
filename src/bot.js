@@ -637,6 +637,7 @@ const bot = {
     go: function () {
         bot.every();
 
+        objectives.forEach((x) => x.tick && x.tick(bot));
         objectives.forEach((x) => x.drawDebug(bot));
         const priorities = objectives.map((x) => x.getPriority(bot));
         const currentObjective =
