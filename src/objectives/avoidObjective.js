@@ -84,10 +84,14 @@ const getPointGradientFunction = () => {
 const avoidObjective = {
     name: "AVOID",
 
-    getAction: () => {
-        const gradFunc = getPointGradientFunction();
+    gradFunc: null,
 
-        const dirGrad = gradFunc(window.snake.xx, window.snake.yy);
+    tick: function () {
+        this.gradFunc = getPointGradientFunction();
+    },
+
+    getAction: function () {
+        const dirGrad = this.gradFunc(window.snake.xx, window.snake.yy);
 
         const len = Math.sqrt(
             Math.pow(dirGrad.dx, 2) + Math.pow(dirGrad.dy, 2)
@@ -102,19 +106,15 @@ const avoidObjective = {
         };
     },
 
-    getPriority: () => {
-        const gradFunc = getPointGradientFunction();
-
-        const { val } = gradFunc(window.snake.xx, window.snake.yy);
+    getPriority: function () {
+        const { val } = this.gradFunc(window.snake.xx, window.snake.yy);
 
         if (val >= ENABLE_THRESHOLD) return 1;
 
         return -1;
     },
 
-    drawDebug: () => {
-        const gradFunc = getPointGradientFunction();
-
+    drawDebug: function () {
         if (window.visualDebugging) {
             const startX = window.snake.xx - DEBUG_RAD;
             const endX = window.snake.xx + DEBUG_RAD;
@@ -124,7 +124,7 @@ const avoidObjective = {
             const cachedVals = [];
             for (let x = startX; x <= endX; x += DEBUG_GAP) {
                 for (let y = startY; y <= endY; y += DEBUG_GAP) {
-                    cachedVals.push(gradFunc(x, y).val);
+                    cachedVals.push(this.gradFunc(x, y).val);
                 }
             }
 
@@ -149,7 +149,7 @@ const avoidObjective = {
         let prev_y = window.snake.yy;
 
         for (let i = 0; i < DEBUG_SHOW_AHEAD; i++) {
-            const dirGrad = gradFunc(prev_x, prev_y);
+            const dirGrad = this.gradFunc(prev_x, prev_y);
 
             if (i === 0 && dirGrad.val < ENABLE_THRESHOLD) {
                 // We are not enabled, dont show visual
