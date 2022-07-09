@@ -3,12 +3,14 @@ import avoidObjective from "./objectives/avoidObjective";
 import centerObjective from "./objectives/centerObjective";
 import oldObjective from "./objectives/oldObjective";
 import foodObjective from "./objectives/foodObjective";
+import pathfindingObjective from "./objectives/pathfindingObjective";
 
 const objectives = [
     avoidObjective,
     centerObjective,
     oldObjective,
     foodObjective,
+    pathfindingObjective
 ];
 
 const bot = {
@@ -635,16 +637,18 @@ const bot = {
 
     // Main bot
     go: function () {
+        if (window.snake.dead) return;
         bot.every();
 
         objectives.forEach((x) => x.tick && x.tick(bot));
-        objectives.forEach((x) => x.drawDebug(bot));
+        //objectives.forEach((x) => x.drawDebug(bot));
         const priorities = objectives.map((x) => x.getPriority(bot));
         const currentObjective =
             objectives[priorities.indexOf(Math.max(...priorities))];
 
         bot.currentObjectiveName = currentObjective.name;
 
+        objectives[4].drawDebug(bot);
         const { target_x, target_y, boost } = currentObjective.getAction(bot);
 
         window.setAcceleration(boost);
