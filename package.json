@@ -4,7 +4,8 @@
     "description": "Slitherio bot",
     "private": true,
     "scripts": {
-        "start": "npx webpack --watch"
+        "start": "npx webpack --watch",
+        "lint": "eslint src\\**\\*.js --fix"
     },
     "repository": {
         "type": "git",
@@ -17,6 +18,7 @@
     },
     "homepage": "https://github.com/stacksparrow4/slbotext#readme",
     "devDependencies": {
+        "eslint": "^8.22.0",
         "webpack": "^5.73.0",
         "webpack-cli": "^4.10.0"
     }
