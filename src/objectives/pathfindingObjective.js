@@ -1,26 +1,33 @@
 import canvasUtil from "../canvasUtil.js";
 //import { PriorityQueue } from "./other/PriorityQueue";
+import bot from "../bot.js";
 
 // consider this.grid cells of size CELL_SIZE x CELL_SIZE
 // TODO: CELL_SIZE varies with your turn radius
-const CELL_SIZE = 80;
+const CELL_SIZE = 50;
 
 // constants for path search
-const NUM_STEPS = 20;
-const STEP_SIZE = 160;
-const SEARCH_REPS = 5;
+const PATH_SIZE = 6;
+const SEARCH_REPS = 20;
 
 // how long each path is valid for (milliseconds)
-const PATH_DURATION = 5000; // TODO: 5 seconds feels a bit long?
+const PATH_DURATION = 600; // TODO: 5 seconds feels a bit long?
+
+const MAX_ROTATION = 52 * Math.PI / 180;
+
+// in pixels per millisecond
+const BASE_SPEED = 0.185;
+const BOOST_SPEED = 0.448;
 
 const pathfindingObjective = {
     name: "PATH FINDING",
     path: [],
+    stepSize: 0,
     pathTime: 0,
     grid: {},
 
     getPriority: function () {
-        return 100000;
+        return 0.8;
     },
 
     visibleSize() {
@@ -28,8 +35,6 @@ const pathfindingObjective = {
         // return the radius of how far you can see
         return 1200;
     },
-
-
 
     snakeToPos: function (snake) {
         return {
@@ -55,7 +60,7 @@ const pathfindingObjective = {
     },
 
     inBounds: function (pos) {
-        return Math.abs(pos.xx - window.snake.xx) < visibleSize() && Math.abs(pos.yy - window.snake.yy) < visibleSize()
+        return Math.abs(pos.xx - window.snake.xx) < this.visibleSize() && Math.abs(pos.yy - window.snake.yy) < this.visibleSize()
     },
 
     addIndication: function (point, score) {
@@ -92,32 +97,55 @@ const pathfindingObjective = {
         }
     },
 
-    findBestPath: function () {
+    genPath(stepSize) {
+        let currPos = { xx: window.snake.xx, yy: window.snake.yy };
+        let currAng = window.snake.ang;
 
+        let currPath = [{ xx: currPos.xx, yy: currPos.yy }];
+
+        for (let i = 0; i < PATH_SIZE; ++i) {
+            // update position
+            currPos.xx += stepSize * Math.cos(currAng);
+            currPos.yy += stepSize * Math.sin(currAng);
+            // ahhhhh copy by reference is so annoying
+            currPath.push({ xx: currPos.xx, yy: currPos.yy });
+
+            // generate new angle
+            // float in range [-rotation, rotation]
+            currAng += (Math.random() - 0.5) * MAX_ROTATION * 2;
+        }
+        return currPath;
+    },
+
+    findScore(path) {
+        if (path.length === 0) {
+            return -Infinity;
+        }
+
+        let currScore = 0;
+        for (let i = 0; i < PATH_SIZE; ++i) {
+            const currPos = path[i];
+            // check for bad, set currScore to -Infinity
+            // check for good, increment score by goodness
+            const posScore = this.grid[this.posToCell(this.snakeToPos(currPos))] || 0;
+            currScore += (PATH_SIZE - i) * posScore;
+        }
+        return currScore;
+    },
+
+    findBestPath: function (forceChange) {
+        // derived from bot.sidecircle_r
+        const TURNING_RADIUS = bot.snakeWidth * bot.speedMult;
+        const STEP_SIZE = 2 * TURNING_RADIUS;
+
+        const originalPath = [...this.path];
+        const originalScore = this.findScore(originalPath);
 
         let bestScore = -Infinity;
         let bestPath = [];
         for (let rep = 0; rep < SEARCH_REPS; ++rep) {
-            let currPos = this.snakeToPos(window.snake);
-            let currAng = window.snake.ang;
-
-            let currScore = 0;
-            let currPath = [currPos];
-
-            for (let i = 0; i < NUM_STEPS; ++i) {
-                // update position
-                currPos.xx += STEP_SIZE * Math.cos(currAng);
-                currPos.yy += STEP_SIZE * Math.sin(currAng);
-                // ahhhhh copy by reference is so annoying
-                currPath.push({ xx: currPos.xx, yy: currPos.yy });
-                
-                // check for bad, set currScore to -Infinity
-                // check for good, increment score by goodness
-
-                // find next angle
-                // |angle diff| bounded by some constant?
-                currAng += 0;
-            }
+            const currPath = this.genPath(STEP_SIZE);
+            const currScore = this.findScore(currPath);
 
             if (currScore > bestScore) {
                 bestScore = currScore;
@@ -125,34 +153,40 @@ const pathfindingObjective = {
             }
         }
 
-        //console.log(bestScore, bestPath);
-        return bestPath;
+        if (forceChange || bestScore > originalScore + 5) {
+            console.log(bestScore);
+            this.path = bestPath;
+            this.pathTime = Date.now();
+            this.stepSize = STEP_SIZE;
+        }
     },
 
     getAction: function () {
-        if (this.pathTime < Date.now() - PATH_DURATION) {
-            // time to create a new path
-            console.log("NEW PATH!");
-            this.pathTime = Date.now()
-            this.path = this.findBestPath();
-            console.log(this.path);
+        let currI = Math.ceil(BOOST_SPEED * (Date.now() - this.pathTime) / this.stepSize);
+        if (this.pathTime < Date.now() - PATH_DURATION || currI >= PATH_SIZE) {
+
+            this.genGrid();
+            this.findBestPath(currI >= PATH_SIZE);
+            currI = Math.ceil(BOOST_SPEED * (Date.now() - this.pathTime) / this.stepSize);
         }
 
         for (let i = 1; i < this.path.length; i++) {
-            canvasUtil.drawLine(this.path[i-1], this.path[i]);
+            canvasUtil.drawLine(this.path[i - 1], this.path[i]);
         }
+
+        // find currI - the next point to aim for along the path
         return {
-            target_x: this.path[i].xx,
-            target_y: this.path[i].yy,
-            boost: false,
+            target_x: this.path[currI].xx,
+            target_y: this.path[currI].yy,
+            boost: true,
         };
     },
 
     drawDebug: function () {
         for (let i = 1; i < this.path.length; i++) {
-            canvasUtil.drawLine(this.path[i-1], this.path[i]);
+            canvasUtil.drawLine(this.path[i - 1], this.path[i]);
         }
-        
+
         /*for (let x = 0; x < X_DIM; x++) {
               for (let y = 0; y < Y_DIM; y++) {
                 // draw square to represent danger of cell

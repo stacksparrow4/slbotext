@@ -611,26 +611,14 @@ const bot = {
         bot.snakeWidth = bot.getSnakeWidth();
 
         bot.sidecircle_r = canvasUtil.circle(
-            window.snake.lnp.xx -
-                (window.snake.lnp.yy +
-                    bot.sin * bot.snakeWidth -
-                    window.snake.lnp.yy),
-            window.snake.lnp.yy +
-                (window.snake.lnp.xx +
-                    bot.cos * bot.snakeWidth -
-                    window.snake.lnp.xx),
+            window.snake.lnp.xx - bot.sin * bot.snakeWidth,
+            window.snake.lnp.yy + bot.cos * bot.snakeWidth,
             bot.snakeWidth * bot.speedMult
         );
 
         bot.sidecircle_l = canvasUtil.circle(
-            window.snake.lnp.xx +
-                (window.snake.lnp.yy +
-                    bot.sin * bot.snakeWidth -
-                    window.snake.lnp.yy),
-            window.snake.lnp.yy -
-                (window.snake.lnp.xx +
-                    bot.cos * bot.snakeWidth -
-                    window.snake.lnp.xx),
+            window.snake.lnp.xx + bot.sin * bot.snakeWidth,
+            window.snake.lnp.yy - bot.cos * bot.snakeWidth,
             bot.snakeWidth * bot.speedMult
         );
     },
