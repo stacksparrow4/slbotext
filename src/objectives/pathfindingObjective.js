@@ -188,8 +188,8 @@ const pathfindingObjective = {
             canvasUtil.drawLine(this.path[i - 1], this.path[i]);
         }
 
-        /*for (let x = 0; x < X_DIM; x++) {
-              for (let y = 0; y < Y_DIM; y++) {
+        /*for (let xx = 0; xx < X_DIM; xx++) {
+              for (let yy = 0; yy < Y_DIM; yy++) {
                 // draw square to represent danger of cell
               }
             }*/

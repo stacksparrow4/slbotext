@@ -615,9 +615,9 @@ const bot = {
         if (window.snake.dead) return;
         bot.every();
 
-        objectives.forEach((x) => x.tick && x.tick(bot));
-        //objectives.forEach((x) => x.drawDebug(bot));
-        const priorities = objectives.map((x) => x.getPriority(bot));
+        objectives.forEach((objective) => objective.tick && objective.tick(bot));
+        //objectives.forEach((objective) => objective.drawDebug(bot));
+        const priorities = objectives.map((objective) => objective.getPriority(bot));
         const currentObjective =
             objectives[priorities.indexOf(Math.max(...priorities))];
 

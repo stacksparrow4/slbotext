@@ -65,20 +65,20 @@ const canvasUtil = {
     },
 
     // Constructor for point type
-    point: function (x, y) {
+    point: function (xx, yy) {
         var p = {
-            xx: Math.round(x),
-            yy: Math.round(y),
+            xx: Math.round(xx),
+            yy: Math.round(yy),
         };
 
         return p;
     },
 
     // Constructor for rect type
-    rect: function (x, y, w, h) {
+    rect: function (xx, yy, w, h) {
         var r = {
-            xx: Math.round(x),
-            yy: Math.round(y),
+            xx: Math.round(xx),
+            yy: Math.round(yy),
             width: Math.round(w),
             height: Math.round(h),
         };
@@ -87,10 +87,10 @@ const canvasUtil = {
     },
 
     // Constructor for circle type
-    circle: function (x, y, r) {
+    circle: function (xx, yy, r) {
         var c = {
-            xx: Math.round(x),
-            yy: Math.round(y),
+            xx: Math.round(xx),
+            yy: Math.round(yy),
             radius: Math.round(r),
         };
 
@@ -98,21 +98,21 @@ const canvasUtil = {
     },
 
     // Fast atan2
-    fastAtan2: function (y, x) {
+    fastAtan2: function (yy, xx) {
         const QPI = Math.PI / 4;
         const TQPI = (3 * Math.PI) / 4;
         var r = 0.0;
         var angle = 0.0;
-        var abs_y = Math.abs(y) + 1e-10;
-        if (x < 0) {
-            r = (x + abs_y) / (abs_y - x);
+        var abs_y = Math.abs(yy) + 1e-10;
+        if (xx < 0) {
+            r = (xx + abs_y) / (abs_y - xx);
             angle = TQPI;
         } else {
-            r = (x - abs_y) / (x + abs_y);
+            r = (xx - abs_y) / (xx + abs_y);
             angle = QPI;
         }
         angle += (0.1963 * r * r - 0.9817) * r;
-        if (y < 0) {
+        if (yy < 0) {
             return -angle;
         }
 

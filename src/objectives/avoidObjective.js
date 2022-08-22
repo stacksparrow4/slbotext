@@ -70,7 +70,6 @@ const avoidObjective = {
 
     getAction: function () {
         const { dx, dy, val } = this.gradFunc(window.snake);
-        console.log(dx, dy, val);
 
         const len = Math.sqrt(
             Math.pow(dx, 2) + Math.pow(dy, 2)
@@ -93,7 +92,7 @@ const avoidObjective = {
     },
 
     drawDebug: function () {
-        if (window.visualDebugging && false) {
+        if (window.visualDebugging) {
             const startX = window.snake.xx - DEBUG_RAD;
             const endX = window.snake.xx + DEBUG_RAD;
             const startY = window.snake.yy - DEBUG_RAD;
