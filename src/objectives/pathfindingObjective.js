@@ -130,7 +130,7 @@ const pathfindingObjective = {
             // check for bad, set currScore to -Infinity
             // check for good, increment score by goodness
             const posScore = this.grid[this.posToCell(this.snakeToPos(currPos))] || 0;
-            currScore += (PATH_SIZE - i) * posScore;
+            currScore += Math.sqrt(PATH_SIZE - i) * posScore;
         }
         return currScore;
     },

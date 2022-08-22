@@ -1,11 +1,14 @@
 import canvasUtil from "../canvasUtil.js";
 import { getSnakes } from "./util";
-import bot from "../bot";
 
 // its bad when youre less than 1.5 radii from the center of a snake
 const CLOSEST_MULT = 2.5;
 
-const ENABLE_THRESHOLD = 1e-9;
+// attracted to in front of an opponents head according to gaussian distribution
+const FRONT_DIST = 190;
+const FRONT_MULT = 10000;
+
+const ENABLE_THRESHOLD = -1e-10;
 
 const DEBUG_GAP = 50;
 const DEBUG_RAD = DEBUG_GAP * 10;
@@ -13,9 +16,8 @@ const DEBUG_NORM = 2;
 const DEBUG_SHOW_AHEAD = 20;
 const DEBUG_RAY_LEN = 10;
 
-function normDist(pointA, pointB, radius) {
-    const minDist = CLOSEST_MULT * Math.max(bot.getSnakeWidth(), radius);
-    return (Math.pow(pointA.xx - pointB.xx, 2) + Math.pow(pointA.yy - pointB.yy, 2)) / minDist;
+function normDist(pointA, pointB) {
+    return (Math.pow(pointA.xx - pointB.xx, 2) + Math.pow(pointA.yy - pointB.yy, 2));
 }
 
 const getPointGradientFunction = () => {
@@ -26,16 +28,26 @@ const getPointGradientFunction = () => {
         let dx = 0;
         let dy = 0;
         for (const s of snakes) {
-            const dist = normDist(point, s, s.radius);
-            val += 1 / Math.pow(dist, 4);
-            dx += 2 * (s.xx - point.xx) / Math.pow(dist, 5);
-            dy += 2 * (s.yy - point.yy) / Math.pow(dist, 5);
+            const inFront = {
+                xx: s.xx + FRONT_DIST * Math.cos(s.ang),
+                yy: s.yy + FRONT_DIST * Math.sin(s.ang)
+            };
+            const frontDist = normDist(point, inFront) / (-s.radius * FRONT_MULT);
+            const dval = Math.exp(frontDist);
+            val += dval;
+            dx += 2 * (inFront.xx - point.xx) / (s.radius * FRONT_MULT) * dval;
+            dy += 2 * (inFront.yy - point.yy) / (s.radius * FRONT_MULT) * dval;
+
+            const dist = normDist(point, s) / (s.radius * CLOSEST_MULT);
+            val -= 1 / Math.pow(dist, 4);
+            dx -= 2 * (s.xx - point.xx) / Math.pow(dist, 5);
+            dy -= 2 * (s.yy - point.yy) / Math.pow(dist, 5);
 
             for (const seg of s.segments) {
-                const dist = normDist(point, seg, s.radius);
-                val += 1 / Math.pow(dist, 4);
-                dx += 2 * (seg.xx - point.xx) / Math.pow(dist, 5);
-                dy += 2 * (seg.yy - point.yy) / Math.pow(dist, 5);
+                const dist = normDist(point, seg) / (s.radius * CLOSEST_MULT);
+                val -= 1 / Math.pow(dist, 4);
+                dx -= 2 * (seg.xx - point.xx) / Math.pow(dist, 5);
+                dy -= 2 * (seg.yy - point.yy) / Math.pow(dist, 5);
             }
         }
 
@@ -57,13 +69,14 @@ const avoidObjective = {
     },
 
     getAction: function () {
-        const { dx, dy } = this.gradFunc(window.snake);
+        const { dx, dy, val } = this.gradFunc(window.snake);
+        console.log(dx, dy, val);
 
         const len = Math.sqrt(
             Math.pow(dx, 2) + Math.pow(dy, 2)
         );
-        const dir_x = -(100 * dx) / len;
-        const dir_y = -(100 * dy) / len;
+        const dir_x = (100 * dx) / len;
+        const dir_y = (100 * dy) / len;
 
         return {
             target_x: window.snake.xx + dir_x,
@@ -73,10 +86,10 @@ const avoidObjective = {
     },
 
     getPriority: function () {
-        const { val } = this.gradFunc(window.snake);
-        //console.log(val);
-        const normalised = val * 2 / ENABLE_THRESHOLD - 1;
-        return Math.max(-1, Math.min(1, normalised));
+        /*const { val } = this.gradFunc(window.snake);
+        const normalised = val / ENABLE_THRESHOLD;
+        return Math.max(-1, Math.min(1, normalised));*/
+        return 100;
     },
 
     drawDebug: function () {
@@ -116,16 +129,16 @@ const avoidObjective = {
         for (let i = 0; i < DEBUG_SHOW_AHEAD; i++) {
             const dirGrad = this.gradFunc({ xx: prev_x, yy: prev_y });
 
-            if (i === 0 && dirGrad.val < ENABLE_THRESHOLD) {
+            if (i === 0 && dirGrad.val > ENABLE_THRESHOLD) {
                 // We are not enabled, dont show visual
-                return;
+                //return;
             }
 
             const len = Math.sqrt(
                 Math.pow(dirGrad.dx, 2) + Math.pow(dirGrad.dy, 2)
             );
-            const dir_x = -(DEBUG_RAY_LEN * dirGrad.dx) / len;
-            const dir_y = -(DEBUG_RAY_LEN * dirGrad.dy) / len;
+            const dir_x = (DEBUG_RAY_LEN * dirGrad.dx) / len;
+            const dir_y = (DEBUG_RAY_LEN * dirGrad.dy) / len;
 
             const curr_x = prev_x + dir_x;
             const curr_y = prev_y + dir_y;

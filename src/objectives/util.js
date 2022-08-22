@@ -13,6 +13,7 @@ export const getSnakes = () => {
         xx: s.xx,
         yy: s.yy,
         radius: bot.getSnakeWidth(s.sc) / 2,
+        ang: s.ang,
         segments: s.pts
             .filter(
                 (p) =>

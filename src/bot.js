@@ -95,25 +95,12 @@ const bot = {
     // -0-pi turn right
 
     changeHeading: function (angle) {
-        var heading = {
-            xx: window.snake.xx + 500 * bot.cos,
-            yy: window.snake.yy + 500 * bot.sin,
-        };
-
         var cos = Math.cos(-angle);
         var sin = Math.sin(-angle);
 
         window.goalCoordinates = {
-            xx: Math.round(
-                cos * (heading.xx - window.snake.xx) -
-                    sin * (heading.yy - window.snake.yy) +
-                    window.snake.xx
-            ),
-            yy: Math.round(
-                sin * (heading.xx - window.snake.xx) +
-                    cos * (heading.yy - window.snake.yy) +
-                    window.snake.yy
-            ),
+            xx: Math.round(window.snake.xx + 500 * (cos * bot.cos - sin * bot.sin)),
+            yy: Math.round(window.snake.yy + 500 * (sin * bot.cos - cos * bot.sin)),
         };
 
         canvasUtil.setMouseCoordinates(
@@ -179,13 +166,13 @@ const bot = {
         window.goalCoordinates = {
             xx: Math.round(
                 cos * (collisionPoint.xx - window.snake.xx) -
-                    sin * (collisionPoint.yy - window.snake.yy) +
-                    window.snake.xx
+                sin * (collisionPoint.yy - window.snake.yy) +
+                window.snake.xx
             ),
             yy: Math.round(
                 sin * (collisionPoint.xx - window.snake.xx) +
-                    cos * (collisionPoint.yy - window.snake.yy) +
-                    window.snake.yy
+                cos * (collisionPoint.yy - window.snake.yy) +
+                window.snake.yy
             ),
         };
 
@@ -572,8 +559,8 @@ const bot = {
             if (
                 bot.collisionAngles[aIndex] &&
                 bot.collisionAngles[aIndex].distance >
-                    bot.currentFood.distance +
-                        bot.snakeWidth * bot.opt.radiusMult &&
+                bot.currentFood.distance +
+                bot.snakeWidth * bot.opt.radiusMult &&
                 bot.currentFood.da < bot.opt.foodAccelAngle
             ) {
                 return 1;
