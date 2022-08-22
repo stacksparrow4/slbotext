@@ -139,7 +139,7 @@ const pathfindingObjective = {
         }
 
         for (let i = 1; i < this.path.length; i++) {
-            canvasUtil.drawLine(this.path[i-1], this.path[i], "#FFFFFF", 20);
+            canvasUtil.drawLine(this.path[i-1], this.path[i]);
         }
         return {
             target_x: this.path[i].xx,
@@ -150,7 +150,7 @@ const pathfindingObjective = {
 
     drawDebug: function () {
         for (let i = 1; i < this.path.length; i++) {
-            canvasUtil.drawLine(this.path[i-1], this.path[i], "#FFFFFF", 20);
+            canvasUtil.drawLine(this.path[i-1], this.path[i]);
         }
         
         /*for (let x = 0; x < X_DIM; x++) {
@@ -162,7 +162,7 @@ const pathfindingObjective = {
             const pos = this.cellToPos(cell);
             const colour = 0 + Math.max(0, (255 - 0) * this.grid[cell]);
             canvasUtil.drawCircle(
-                { x: pos.xx, y: pos.yy, radius: CELL_SIZE / 2 },
+                { xx: pos.xx, yy: pos.yy, radius: CELL_SIZE / 2 },
                 //`rgba(255, 255, 255, ${colour/255})`,
                 `rgb(${colour}, ${colour}, ${colour}, 0.7)`,
                 true

@@ -10,8 +10,8 @@ const oldObjective = {
         const boost = !bot.checkCollision() && bot.foodAccel();
         bot.computeFoodGoal();
         return {
-            target_x: bot.currentFood.x,
-            target_y: bot.currentFood.y,
+            target_x: bot.currentFood.xx,
+            target_y: bot.currentFood.yy,
             boost: boost,
         };
     },

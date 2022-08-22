@@ -377,19 +377,19 @@ const userInterface = {
 
             // Display the X and Y of the snake
             oContent.push(
-                "x: " +
+                "xx: " +
                     (Math.round(window.snake.xx) || 0) +
-                    " y: " +
+                    " yy: " +
                     (Math.round(window.snake.yy) || 0)
             );
 
             if (window.goalCoordinates) {
                 oContent.push("target");
                 oContent.push(
-                    "x: " +
-                        window.goalCoordinates.x +
-                        " y: " +
-                        window.goalCoordinates.y
+                    "xx: " +
+                        window.goalCoordinates.xx +
+                        " yy: " +
+                        window.goalCoordinates.yy
                 );
                 if (window.goalCoordinates.sz) {
                     oContent.push("sz: " + window.goalCoordinates.sz);
@@ -415,8 +415,8 @@ const userInterface = {
             // Only draw the goal when a bot has a goal.
             if (window.goalCoordinates && bot.isBotEnabled) {
                 var headCoord = {
-                    x: window.snake.xx,
-                    y: window.snake.yy,
+                    xx: window.snake.xx,
+                    yy: window.snake.yy,
                 };
                 canvasUtil.drawLine(headCoord, window.goalCoordinates, "green");
                 canvasUtil.drawCircle(window.goalCoordinates, "red", true);
@@ -480,8 +480,8 @@ const userInterface = {
         window.resize();
         // Canvas different size from the screen (often bigger).
         canvasUtil.canvasRatio = {
-            x: window.mc.width / window.ww,
-            y: window.mc.height / window.hh,
+            xx: window.mc.width / window.ww,
+            yy: window.mc.height / window.hh,
         };
     },
     // Handles the text color of the bot preferences

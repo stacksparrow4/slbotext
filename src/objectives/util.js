@@ -10,8 +10,8 @@ export const getSnakes = () => {
 
     return alive_snakes.map((s) => ({
         // Head is at s.xx, s.yy
-        x: s.xx,
-        y: s.yy,
+        xx: s.xx,
+        yy: s.yy,
         radius: bot.getSnakeWidth(s.sc) / 2,
         segments: s.pts
             .filter(
@@ -19,12 +19,12 @@ export const getSnakes = () => {
                     !p.dying &&
                     canvasUtil.pointInRect(
                         {
-                            x: p.xx,
-                            y: p.yy,
+                            xx: p.xx,
+                            yy: p.yy,
                         },
                         bot.sectorBox
                     )
             )
-            .map((p) => ({ x: p.xx, y: p.yy })),
+            .map((p) => ({ xx: p.xx, yy: p.yy })),
     }));
 };

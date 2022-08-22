@@ -22,29 +22,29 @@ const getPointGradientFunction = () => {
                 const size_factor = s.radius / BASE_RAD;
 
                 const distance_from_head =
-                    Math.pow(s.x - x, 2) + Math.pow(s.y - y, 2);
+                    Math.pow(s.xx - x, 2) + Math.pow(s.yy - y, 2);
                 const head_value = Math.exp(
                     -distance_from_head / (HEAD_DISTANCE_FACTOR * size_factor)
                 );
                 const partial_x =
-                    head_value * ((-2 * (x - s.x)) / HEAD_DISTANCE_FACTOR);
+                    head_value * ((-2 * (x - s.xx)) / HEAD_DISTANCE_FACTOR);
                 const partial_y =
-                    head_value * ((-2 * (y - s.y)) / HEAD_DISTANCE_FACTOR);
+                    head_value * ((-2 * (y - s.yy)) / HEAD_DISTANCE_FACTOR);
 
                 const body_value = s.segments
                     .map((seg) => {
                         const distance_from_seg =
-                            Math.pow(seg.x - x, 2) + Math.pow(seg.y - y, 2);
+                            Math.pow(seg.xx - x, 2) + Math.pow(seg.yy - y, 2);
                         const seg_val = Math.exp(
                             -distance_from_seg /
                                 (BODY_DISTANCE_FACTOR * size_factor)
                         );
                         const partial_x =
                             seg_val *
-                            ((-2 * (x - seg.x)) / BODY_DISTANCE_FACTOR);
+                            ((-2 * (x - seg.xx)) / BODY_DISTANCE_FACTOR);
                         const partial_y =
                             seg_val *
-                            ((-2 * (y - seg.y)) / BODY_DISTANCE_FACTOR);
+                            ((-2 * (y - seg.yy)) / BODY_DISTANCE_FACTOR);
 
                         return { val: seg_val, dx: partial_x, dy: partial_y };
                     })
