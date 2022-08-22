@@ -2,10 +2,10 @@ import canvasUtil from "../canvasUtil.js";
 import { getSnakes } from "./util";
 
 const HEAD_DISTANCE_FACTOR = 30000;
-const BODY_DISTANCE_FACTOR = 3000;
+const BODY_DISTANCE_FACTOR = 300;
 const BASE_RAD = 15;
 
-const ENABLE_THRESHOLD = 0.005;
+const ENABLE_THRESHOLD = 0.012;
 
 const DEBUG_GAP = 50;
 const DEBUG_RAD = DEBUG_GAP * 10;
@@ -108,10 +108,8 @@ const avoidObjective = {
 
     getPriority: function () {
         const { val } = this.gradFunc(window.snake.xx, window.snake.yy);
-
-        if (val >= ENABLE_THRESHOLD) return 1;
-
-        return -1;
+        const normalised = val * 2 / ENABLE_THRESHOLD - 1;
+        return Math.max(-1, Math.min(1, normalised));
     },
 
     drawDebug: function () {

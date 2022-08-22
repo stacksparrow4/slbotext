@@ -2,18 +2,20 @@ import canvasUtil from "../canvasUtil.js";
 //import { PriorityQueue } from "./other/PriorityQueue";
 import bot from "../bot.js";
 
+const isLong = false;
+
 // consider this.grid cells of size CELL_SIZE x CELL_SIZE
 // TODO: CELL_SIZE varies with your turn radius
 const CELL_SIZE = 50;
 
 // constants for path search
-const PATH_SIZE = 6;
-const SEARCH_REPS = 20;
+const PATH_SIZE = isLong ? 20 : 6;
+const SEARCH_REPS = isLong ? 200: 20;
 
 // how long each path is valid for (milliseconds)
-const PATH_DURATION = 600; // TODO: 5 seconds feels a bit long?
+const PATH_DURATION = isLong ? 2000: 600;
 
-const MAX_ROTATION = 52 * Math.PI / 180;
+ const MAX_ROTATION = 52 * Math.PI / 180;
 
 // in pixels per millisecond
 const BASE_SPEED = 0.185;
@@ -33,7 +35,7 @@ const pathfindingObjective = {
     visibleSize() {
         // TODO
         // return the radius of how far you can see
-        return 1200;
+        return 800;
     },
 
     snakeToPos: function (snake) {
@@ -153,8 +155,7 @@ const pathfindingObjective = {
             }
         }
 
-        if (forceChange || bestScore > originalScore + 5) {
-            console.log(bestScore);
+        if (forceChange || bestScore > originalScore + 2) {
             this.path = bestPath;
             this.pathTime = Date.now();
             this.stepSize = STEP_SIZE;
@@ -162,12 +163,12 @@ const pathfindingObjective = {
     },
 
     getAction: function () {
-        let currI = Math.ceil(BOOST_SPEED * (Date.now() - this.pathTime) / this.stepSize);
+        let currI = Math.ceil(BASE_SPEED * (Date.now() - this.pathTime) / this.stepSize);
         if (this.pathTime < Date.now() - PATH_DURATION || currI >= PATH_SIZE) {
 
             this.genGrid();
             this.findBestPath(currI >= PATH_SIZE);
-            currI = Math.ceil(BOOST_SPEED * (Date.now() - this.pathTime) / this.stepSize);
+            currI = Math.ceil(BASE_SPEED * (Date.now() - this.pathTime) / this.stepSize);
         }
 
         for (let i = 1; i < this.path.length; i++) {
@@ -178,7 +179,7 @@ const pathfindingObjective = {
         return {
             target_x: this.path[currI].xx,
             target_y: this.path[currI].yy,
-            boost: true,
+            boost: false,
         };
     },
 
