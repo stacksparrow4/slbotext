@@ -648,7 +648,7 @@ const bot = {
 
         bot.currentObjectiveName = currentObjective.name;
 
-        objectives[4].drawDebug(bot);
+        currentObjective.drawDebug(bot);
         const { target_x, target_y, boost } = currentObjective.getAction(bot);
 
         window.setAcceleration(boost);
