@@ -1,5 +1,7 @@
-import bot from "../bot";
-import canvasUtil from "../canvasUtil";
+import bot from "./bot";
+import { MAX_RAY_DIST } from "./raycast";
+
+const SQR_RAY_DIST = MAX_RAY_DIST * MAX_RAY_DIST;
 
 // Helper function to get info about other snakes.
 // Mainly just cleaning up the mess that is the snakes array
@@ -17,13 +19,8 @@ export const getSnakes = () => {
             .filter(
                 (p) =>
                     !p.dying &&
-                    canvasUtil.pointInRect(
-                        {
-                            x: p.xx,
-                            y: p.yy,
-                        },
-                        bot.sectorBox
-                    )
+                    (p.xx - snake.xx) ** 2 + (p.yy - snake.yy) ** 2 <
+                        SQR_RAY_DIST
             )
             .map((p) => ({ x: p.xx, y: p.yy })),
     }));

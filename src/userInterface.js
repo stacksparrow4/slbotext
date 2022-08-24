@@ -396,9 +396,6 @@ const userInterface = {
                 }
             }
 
-            // Display bot objective
-            oContent.push("Objective: " + bot.currentObjectiveName);
-
             if (
                 window.bso !== undefined &&
                 userInterface.overlays.serverOverlay.innerHTML !==
@@ -430,6 +427,8 @@ const userInterface = {
         original_oef();
         // Modified slither.io redraw function
         new_redraw();
+
+        if (window.playing && window.snake !== null) bot.drawGizmos();
 
         if (window.playing && bot.isBotEnabled && window.snake !== null) {
             window.onmousemove = function () {};

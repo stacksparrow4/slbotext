@@ -1,19 +1,10 @@
 import canvasUtil from "./canvasUtil";
-import avoidObjective from "./objectives/avoidObjective";
-import centerObjective from "./objectives/centerObjective";
-import oldObjective from "./objectives/oldObjective";
-import foodObjective from "./objectives/foodObjective";
-
-const objectives = [
-    avoidObjective,
-    centerObjective,
-    oldObjective,
-    foodObjective,
-];
+import raycast from "./raycast";
+import { getSnakes } from "./util";
 
 const bot = {
     isBotRunning: false,
-    isBotEnabled: true,
+    isBotEnabled: false,
     lookForFood: false,
     collisionPoints: [],
     collisionAngles: [],
@@ -23,7 +14,6 @@ const bot = {
     defaultAccel: 0,
     sectorBox: {},
     currentFood: {},
-    currentObjectiveName: "",
     opt: {
         // These are the bot's default options
         // If you wish to customise these, use
@@ -637,20 +627,23 @@ const bot = {
     go: function () {
         bot.every();
 
-        objectives.forEach((x) => x.tick && x.tick(bot));
-        objectives.forEach((x) => x.drawDebug(bot));
-        const priorities = objectives.map((x) => x.getPriority(bot));
-        const currentObjective =
-            objectives[priorities.indexOf(Math.max(...priorities))];
-
-        bot.currentObjectiveName = currentObjective.name;
-
-        const { target_x, target_y, boost } = currentObjective.getAction(bot);
+        const target_x = bot.MAP_R;
+        const target_y = bot.MAP_R;
+        const boost = false;
 
         window.setAcceleration(boost);
         canvasUtil.setMouseCoordinates(
             canvasUtil.mapToMouse(canvasUtil.point(target_x, target_y))
         );
+    },
+
+    drawGizmos: function () {
+        const snakes = getSnakes();
+
+        for (let ang = -Math.PI / 3; ang < Math.PI / 3; ang += Math.PI / 24) {
+            const pnt = raycast(snake.xx, snake.yy, snake.ang + ang, snakes);
+            canvasUtil.drawLine({ x: snake.xx, y: snake.yy }, pnt, "#f00", 3);
+        }
     },
 };
 
