@@ -29,3 +29,12 @@ export const getSnakes = () => {
             .map((p) => ({ xx: p.xx, yy: p.yy })),
     }));
 };
+
+
+export const distanceBetween2 = (pos1, pos2) => {
+    return (pos1.xx - pos2.xx) * (pos1.xx - pos2.xx) + (pos1.yy - pos2.yy) * (pos1.yy - pos2.yy);
+}
+
+export const distanceBetween = (pos1, pos2) => {
+    return Math.sqrt(distanceBetween2(pos1, pos2));
+}

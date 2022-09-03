@@ -1,8 +1,10 @@
 import canvasUtil from "../canvasUtil.js";
 //import { PriorityQueue } from "./other/PriorityQueue";
 import bot from "../bot.js";
+import { getSnakes, distanceBetween2 } from "./util.js";
 
-const isLong = false;
+//const isLong = false;
+const isLong = true;
 
 // consider this.grid cells of size CELL_SIZE x CELL_SIZE
 // TODO: CELL_SIZE varies with your turn radius
@@ -10,12 +12,12 @@ const CELL_SIZE = 50;
 
 // constants for path search
 const PATH_SIZE = isLong ? 20 : 6;
-const SEARCH_REPS = isLong ? 200: 20;
+const SEARCH_REPS = isLong ? 200 : 10;
 
 // how long each path is valid for (milliseconds)
-const PATH_DURATION = isLong ? 2000: 600;
+const PATH_DURATION = isLong ? 2000 : 1200;
 
- const MAX_ROTATION = 52 * Math.PI / 180;
+const MAX_ROTATION = 52 * Math.PI / 180;
 
 // in pixels per millisecond
 const BASE_SPEED = 0.185;
@@ -26,10 +28,11 @@ const pathfindingObjective = {
     path: [],
     stepSize: 0,
     pathTime: 0,
-    grid: {},
+    grid: [],
 
     getPriority: function () {
-        return 0.8;
+        //return 0.8;
+        return 10000;
     },
 
     visibleSize() {
@@ -38,26 +41,10 @@ const pathfindingObjective = {
         return 800;
     },
 
-    snakeToPos: function (snake) {
+    posToRegion: function (pos) {
         return {
-            xx: Math.round(snake.xx / CELL_SIZE) * CELL_SIZE,
-            yy: Math.round(snake.yy / CELL_SIZE) * CELL_SIZE
-        };
-    },
-
-    posToCell: function (point) {
-        return (
-            (Math.round(point.xx / CELL_SIZE) * CELL_SIZE).toString() +
-            " " +
-            (Math.round(point.yy / CELL_SIZE) * CELL_SIZE).toString()
-        );
-    },
-
-    cellToPos: function (cell) {
-        cell = cell.split(" ");
-        return {
-            xx: parseInt(cell[0]),
-            yy: parseInt(cell[1]),
+            xx: Math.floor(pos.xx / CELL_SIZE) * CELL_SIZE,
+            yy: Math.floor(pos.yy / CELL_SIZE) * CELL_SIZE
         };
     },
 
@@ -65,23 +52,40 @@ const pathfindingObjective = {
         return Math.abs(pos.xx - window.snake.xx) < this.visibleSize() && Math.abs(pos.yy - window.snake.yy) < this.visibleSize()
     },
 
-    addIndication: function (point, score) {
-        if (this.inBounds(point)) {
-            const cell = this.posToCell(point);
-            this.grid[cell] = (this.grid[cell] || 0) + score;
+    addIndication: function (pos, score) {
+        if (this.inBounds(pos)) {
+            const regionxx = this.posToRegion(pos).xx;
+            const regionyy = this.posToRegion(pos).yy;
+            this.grid[regionxx] = this.grid[regionxx] || [];
+            this.grid[regionxx][regionyy] = this.grid[regionxx][regionyy] || [];
+            this.grid[regionxx][regionyy].push({ xx: pos.xx, yy: pos.yy, score: score });
         }
     },
 
-    genGrid: function () {
-        this.grid = {};
-        for (const snake of window.snakes) {
-            // you are neutral about crossing yourself
-            if (window.snake.id === snake.id) continue;
-
-            for (const i in snake.pts) {
-                if (!snake.pts[i].dying) {
-                    this.addIndication(snake.pts[i], -Infinity);
+    getIndication: function (pos, dist) {
+        // return sum of scores within a distance of "dist" from "pos"
+        let total = 0;
+        const regionxx = this.posToRegion(pos).xx;
+        const regionyy = this.posToRegion(pos).yy;
+        if (this.grid[regionxx] && this.grid[regionxx][regionyy]) {
+            for (const indication of this.grid[regionxx][regionyy]) {
+                if (distanceBetween2(indication, pos) <= dist * dist) {
+                    total += indication.score;
                 }
+            }
+        }
+        return total;
+    },
+
+    genGrid: function () {
+        this.grid = [];
+        const snakes = getSnakes();
+        for (const snake of snakes) {
+            // you are neutral about crossing yourself
+            // if (window.snake.id === snake.id) continue;
+
+            for (const { xx, yy } of snake.segments) {
+                this.addIndication({ xx, yy }, -Infinity);
             }
         }
 
@@ -100,6 +104,8 @@ const pathfindingObjective = {
     },
 
     genPath(stepSize) {
+        // TODO: apply path smoothing so that paths have better intention
+        // this can be implemented by weighting each point by neighbouring points
         let currPos = { xx: window.snake.xx, yy: window.snake.yy };
         let currAng = window.snake.ang;
 
@@ -114,7 +120,7 @@ const pathfindingObjective = {
 
             // generate new angle
             // float in range [-rotation, rotation]
-            currAng += (Math.random() - 0.5) * MAX_ROTATION * 2;
+            currAng += (Math.random() - 0.5) * 2 * MAX_ROTATION;
         }
         return currPath;
     },
@@ -129,8 +135,7 @@ const pathfindingObjective = {
             const currPos = path[i];
             // check for bad, set currScore to -Infinity
             // check for good, increment score by goodness
-            const posScore = this.grid[this.posToCell(this.snakeToPos(currPos))] || 0;
-            currScore += Math.sqrt(PATH_SIZE - i) * posScore;
+            currScore += Math.sqrt(PATH_SIZE - i) * this.getIndication(currPos, 100);
         }
         return currScore;
     },
@@ -155,20 +160,37 @@ const pathfindingObjective = {
             }
         }
 
+        console.log(bestScore);
+
         if (forceChange || bestScore > originalScore + 2) {
+            if (forceChange) console.log("forced change");
+            else console.log("unforced change");
+
             this.path = bestPath;
             this.pathTime = Date.now();
             this.stepSize = STEP_SIZE;
         }
     },
 
-    getAction: function () {
-        let currI = Math.ceil(BASE_SPEED * (Date.now() - this.pathTime) / this.stepSize);
-        if (this.pathTime < Date.now() - PATH_DURATION || currI >= PATH_SIZE) {
+    // look at this.path and determine next target point
+    findCurrI: function () {
+        // TODO determine closest point and return next point
+        //return Math.ceil(BASE_SPEED * (Date.now() - this.pathTime) / this.stepSize);
+        let bestI = 0;
+        for (let i = 1; i < this.path.length; i++) {
+            if (distanceBetween2(window.snake, this.path[i]) < distanceBetween2(window.snake, this.path[bestI])) {
+                bestI = i;
+            }
+        }
+        return bestI + 2;
+    },
 
+    getAction: function () {
+        let currI = this.findCurrI();
+        if (this.pathTime < Date.now() - PATH_DURATION || currI >= PATH_SIZE) {
             this.genGrid();
             this.findBestPath(currI >= PATH_SIZE);
-            currI = Math.ceil(BASE_SPEED * (Date.now() - this.pathTime) / this.stepSize);
+            currI = this.findCurrI();
         }
 
         for (let i = 1; i < this.path.length; i++) {
@@ -193,16 +215,16 @@ const pathfindingObjective = {
                 // draw square to represent danger of cell
               }
             }*/
-        for (const cell of Object.keys(this.grid)) {
-            const pos = this.cellToPos(cell);
-            const colour = 0 + Math.max(0, (255 - 0) * this.grid[cell]);
-            canvasUtil.drawCircle(
-                { xx: pos.xx, yy: pos.yy, radius: CELL_SIZE / 2 },
-                //`rgba(255, 255, 255, ${colour/255})`,
-                `rgb(${colour}, ${colour}, ${colour}, 0.7)`,
-                true
-            );
-        }
+        // for (const cell of Object.keys(this.grid)) {
+        //     const pos = this.cellToPos(cell);
+        //     const colour = 0 + Math.max(0, (255 - 0) * this.grid[cell]);
+        //     canvasUtil.drawCircle(
+        //         { xx: pos.xx, yy: pos.yy, radius: CELL_SIZE / 2 },
+        //         //`rgba(255, 255, 255, ${colour/255})`,
+        //         `rgb(${colour}, ${colour}, ${colour}, 0.7)`,
+        //         true
+        //     );
+        // }
     },
 };
 
