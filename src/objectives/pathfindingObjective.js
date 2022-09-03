@@ -12,7 +12,7 @@ const CELL_SIZE = 50;
 
 // constants for path search
 const PATH_SIZE = isLong ? 20 : 6;
-const SEARCH_REPS = isLong ? 200 : 10;
+const SEARCH_REPS = isLong ? 300 : 10;
 
 // how long each path is valid for (milliseconds)
 const PATH_DURATION = isLong ? 2000 : 1200;
@@ -53,6 +53,8 @@ const pathfindingObjective = {
     },
 
     addIndication: function (pos, score) {
+        // grid partitioning for fast lookups
+        // (i know this is an optimisation, but its necessary because finding the score of a path requires you to know indication of nearby positions)
         if (this.inBounds(pos)) {
             const regionxx = this.posToRegion(pos).xx;
             const regionyy = this.posToRegion(pos).yy;
@@ -135,6 +137,7 @@ const pathfindingObjective = {
             const currPos = path[i];
             // check for bad, set currScore to -Infinity
             // check for good, increment score by goodness
+            // assuming can only collect food and collide with snakes within a radius of 100
             currScore += Math.sqrt(PATH_SIZE - i) * this.getIndication(currPos, 100);
         }
         return currScore;
@@ -174,14 +177,21 @@ const pathfindingObjective = {
 
     // look at this.path and determine next target point
     findCurrI: function () {
-        // TODO determine closest point and return next point
+        // this is the orignal dumb way - your progress increases linearly with time
+        // this doesnt account for boosts
         //return Math.ceil(BASE_SPEED * (Date.now() - this.pathTime) / this.stepSize);
+
+        // find cloest point and aim for the "next" point
+        // TODO: this very much breaks when the path is self intersecting, or
+        // close the being self intersecting
         let bestI = 0;
         for (let i = 1; i < this.path.length; i++) {
             if (distanceBetween2(window.snake, this.path[i]) < distanceBetween2(window.snake, this.path[bestI])) {
                 bestI = i;
             }
         }
+        
+        // +2 adds some smoothing to make snake movements seem natural
         return bestI + 2;
     },
 
@@ -191,10 +201,6 @@ const pathfindingObjective = {
             this.genGrid();
             this.findBestPath(currI >= PATH_SIZE);
             currI = this.findCurrI();
-        }
-
-        for (let i = 1; i < this.path.length; i++) {
-            canvasUtil.drawLine(this.path[i - 1], this.path[i]);
         }
 
         // find currI - the next point to aim for along the path
