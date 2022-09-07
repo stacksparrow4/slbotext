@@ -2,6 +2,7 @@ import customBotOptions from "./config";
 import userInterface from "./userInterface";
 import bot from "./bot";
 import canvasUtil from "./canvasUtil";
+import { connectToTrainingServer } from "./trainingNetwork";
 
 window.play_btn.btnf.addEventListener(
     "click",
@@ -87,3 +88,6 @@ setInterval(userInterface.framesPerSecond.fpsTimer, 80);
 
 // Start!
 userInterface.oefTimer();
+
+// Connect to training network
+connectToTrainingServer();

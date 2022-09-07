@@ -1,5 +1,6 @@
 import canvasUtil from "./canvasUtil";
-import raycast from "./raycast";
+import raycast, { MAX_RAY_DIST } from "./raycast";
+import { obtainTrainingData } from "./trainingNetwork";
 import { getSnakes } from "./util";
 
 const bot = {
@@ -637,13 +638,26 @@ const bot = {
         );
     },
 
-    drawGizmos: function () {
+    collectData: function () {
+        if (snake.dead) return;
+
         const snakes = getSnakes();
 
-        for (let ang = -Math.PI / 3; ang < Math.PI / 3; ang += Math.PI / 24) {
+        let trainingData = [];
+
+        for (
+            let ang = -Math.PI * 0.7;
+            ang < Math.PI * 0.7;
+            ang += Math.PI * 0.05
+        ) {
             const pnt = raycast(snake.xx, snake.yy, snake.ang + ang, snakes);
+
+            trainingData.push(pnt.dist / MAX_RAY_DIST);
+
             canvasUtil.drawLine({ x: snake.xx, y: snake.yy }, pnt, "#f00", 3);
         }
+
+        obtainTrainingData(trainingData);
     },
 };
 

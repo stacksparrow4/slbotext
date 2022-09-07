@@ -11,9 +11,6 @@ function raycast(sx, sy, angle, snakes) {
     const wx = -vy;
     const wy = vx;
 
-    // quadratic coeff
-    const a = vx * vx + vy * vy;
-
     let closestDist = MAX_RAY_DIST;
 
     for (let i = 0; i < snakes.length; i++) {
@@ -53,7 +50,7 @@ function raycast(sx, sy, angle, snakes) {
                 const b = -2 * (vx * dx + vy * dy);
                 const c = dx * dx + dy * dy - rad * rad;
 
-                const t = (-b - Math.sqrt(b * b - 4 * a * c)) / (2 * a);
+                const t = (-b - Math.sqrt(b * b - 4 * c)) / 2;
 
                 if (t < closestDist) {
                     closestDist = t;
@@ -62,7 +59,11 @@ function raycast(sx, sy, angle, snakes) {
         }
     }
 
-    return { x: sx + vx * closestDist, y: sy + vy * closestDist };
+    return {
+        x: sx + vx * closestDist,
+        y: sy + vy * closestDist,
+        dist: closestDist,
+    };
 }
 
 export default raycast;

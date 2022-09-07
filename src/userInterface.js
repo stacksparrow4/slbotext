@@ -1,5 +1,6 @@
 import bot from "./bot";
 import canvasUtil from "./canvasUtil";
+import { trainingRoundTerminated } from "./trainingNetwork";
 
 // Save the original slither.io functions so we can modify them, or reenable them later.
 var original_keydown = document.onkeydown;
@@ -428,7 +429,11 @@ const userInterface = {
         // Modified slither.io redraw function
         new_redraw();
 
-        if (window.playing && window.snake !== null) bot.drawGizmos();
+        if (window.playing && window.snake !== null) bot.collectData();
+
+        if (window.snake && window.snake.dead) {
+            trainingRoundTerminated();
+        }
 
         if (window.playing && bot.isBotEnabled && window.snake !== null) {
             window.onmousemove = function () {};
