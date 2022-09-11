@@ -1,47 +1,47 @@
 const canvasUtil = {
     // Ratio of screen size divided by canvas size.
     canvasRatio: {
-        x: window.mc.width / window.ww,
-        y: window.mc.height / window.hh,
+        xx: window.mc.width / window.ww,
+        yy: window.mc.height / window.hh,
     },
 
     // Set direction of snake towards the virtual mouse coordinates
     setMouseCoordinates: function (point) {
-        window.xm = point.x;
-        window.ym = point.y;
+        window.xm = point.xx;
+        window.ym = point.yy;
     },
 
     // Convert snake-relative coordinates to absolute screen coordinates.
     mouseToScreen: function (point) {
-        var screenX = point.x + window.ww / 2;
-        var screenY = point.y + window.hh / 2;
+        var screenX = point.xx + window.ww / 2;
+        var screenY = point.yy + window.hh / 2;
         return {
-            x: screenX,
-            y: screenY,
+            xx: screenX,
+            yy: screenY,
         };
     },
 
     // Convert screen coordinates to canvas coordinates.
     screenToCanvas: function (point) {
         var canvasX =
-            window.csc * (point.x * canvasUtil.canvasRatio.x) -
+            window.csc * (point.xx * canvasUtil.canvasRatio.xx) -
             parseInt(window.mc.style.left);
         var canvasY =
-            window.csc * (point.y * canvasUtil.canvasRatio.y) -
+            window.csc * (point.yy * canvasUtil.canvasRatio.yy) -
             parseInt(window.mc.style.top);
         return {
-            x: canvasX,
-            y: canvasY,
+            xx: canvasX,
+            yy: canvasY,
         };
     },
 
     // Convert map coordinates to mouse coordinates.
     mapToMouse: function (point) {
-        var mouseX = (point.x - window.snake.xx) * window.gsc;
-        var mouseY = (point.y - window.snake.yy) * window.gsc;
+        var mouseX = (point.xx - window.snake.xx) * window.gsc;
+        var mouseY = (point.yy - window.snake.yy) * window.gsc;
         return {
-            x: mouseX,
-            y: mouseY,
+            xx: mouseX,
+            yy: mouseY,
         };
     },
 
@@ -57,28 +57,28 @@ const canvasUtil = {
     circleMapToCanvas: function (circle) {
         var newCircle = canvasUtil.mapToCanvas(circle);
         return canvasUtil.circle(
-            newCircle.x,
-            newCircle.y,
+            newCircle.xx,
+            newCircle.yy,
             // Radius also needs to scale by .gsc
             circle.radius * window.gsc
         );
     },
 
     // Constructor for point type
-    point: function (x, y) {
+    point: function (xx, yy) {
         var p = {
-            x: Math.round(x),
-            y: Math.round(y),
+            xx: Math.round(xx),
+            yy: Math.round(yy),
         };
 
         return p;
     },
 
     // Constructor for rect type
-    rect: function (x, y, w, h) {
+    rect: function (xx, yy, w, h) {
         var r = {
-            x: Math.round(x),
-            y: Math.round(y),
+            xx: Math.round(xx),
+            yy: Math.round(yy),
             width: Math.round(w),
             height: Math.round(h),
         };
@@ -87,10 +87,10 @@ const canvasUtil = {
     },
 
     // Constructor for circle type
-    circle: function (x, y, r) {
+    circle: function (xx, yy, r) {
         var c = {
-            x: Math.round(x),
-            y: Math.round(y),
+            xx: Math.round(xx),
+            yy: Math.round(yy),
             radius: Math.round(r),
         };
 
@@ -98,21 +98,21 @@ const canvasUtil = {
     },
 
     // Fast atan2
-    fastAtan2: function (y, x) {
+    fastAtan2: function (yy, xx) {
         const QPI = Math.PI / 4;
         const TQPI = (3 * Math.PI) / 4;
         var r = 0.0;
         var angle = 0.0;
-        var abs_y = Math.abs(y) + 1e-10;
-        if (x < 0) {
-            r = (x + abs_y) / (abs_y - x);
+        var abs_y = Math.abs(yy) + 1e-10;
+        if (xx < 0) {
+            r = (xx + abs_y) / (abs_y - xx);
             angle = TQPI;
         } else {
-            r = (x - abs_y) / (x + abs_y);
+            r = (xx - abs_y) / (xx + abs_y);
             angle = QPI;
         }
         angle += (0.1963 * r * r - 0.9817) * r;
-        if (y < 0) {
+        if (yy < 0) {
             return -angle;
         }
 
@@ -148,16 +148,16 @@ const canvasUtil = {
 
         var context = window.mc.getContext("2d");
         var lc = canvasUtil.mapToCanvas({
-            x: rect.x,
-            y: rect.y,
+            xx: rect.xx,
+            yy: rect.yy,
         });
 
         context.save();
         context.globalAlpha = alpha;
         context.strokeStyle = color;
         context.rect(
-            lc.x,
-            lc.y,
+            lc.xx,
+            lc.yy,
             rect.width * window.gsc,
             rect.height * window.gsc
         );
@@ -182,8 +182,8 @@ const canvasUtil = {
         context.beginPath();
         context.strokeStyle = color;
         context.arc(
-            drawCircle.x,
-            drawCircle.y,
+            drawCircle.xx,
+            drawCircle.yy,
             drawCircle.radius,
             0,
             Math.PI * 2
@@ -230,6 +230,7 @@ const canvasUtil = {
 
     // Draw a line on the canvas.
     drawLine: function (p1, p2, color, width) {
+        if (color === undefined) color = '#FFFFFF';
         if (width === undefined) width = 5;
 
         var context = window.mc.getContext("2d");
@@ -240,8 +241,8 @@ const canvasUtil = {
         context.beginPath();
         context.lineWidth = width * window.gsc;
         context.strokeStyle = color;
-        context.moveTo(dp1.x, dp1.y);
-        context.lineTo(dp2.x, dp2.y);
+        context.moveTo(dp1.xx, dp1.yy);
+        context.lineTo(dp2.xx, dp2.yy);
         context.stroke();
         context.restore();
     },
@@ -249,8 +250,8 @@ const canvasUtil = {
     // Given the start and end of a line, is point left.
     isLeft: function (start, end, point) {
         return (
-            (end.x - start.x) * (point.y - start.y) -
-                (end.y - start.y) * (point.x - start.x) >
+            (end.xx - start.xx) * (point.yy - start.yy) -
+                (end.yy - start.yy) * (point.xx - start.xx) >
             0
         );
     },
@@ -274,10 +275,10 @@ const canvasUtil = {
     // Check if point in Rect
     pointInRect: function (point, rect) {
         if (
-            rect.x <= point.x &&
-            rect.y <= point.y &&
-            rect.x + rect.width >= point.x &&
-            rect.y + rect.height >= point.y
+            rect.xx <= point.xx &&
+            rect.yy <= point.yy &&
+            rect.xx + rect.width >= point.xx &&
+            rect.yy + rect.height >= point.yy
         ) {
             return true;
         }
@@ -287,8 +288,8 @@ const canvasUtil = {
     // Check if circles intersect
     circleIntersect: function (circle1, circle2) {
         var bothRadii = circle1.radius + circle2.radius;
-        var dx = circle1.x - circle2.x;
-        var dy = circle1.y - circle2.y;
+        var dx = circle1.xx - circle2.xx;
+        var dy = circle1.yy - circle2.yy;
 
         // Pretends the circles are squares for a quick collision check.
         // If it collides, do the more expensive circle check.
@@ -299,20 +300,20 @@ const canvasUtil = {
             dy - bothRadii < 0
         ) {
             var distance2 = canvasUtil.getDistance2(
-                circle1.x,
-                circle1.y,
-                circle2.x,
-                circle2.y
+                circle1.xx,
+                circle1.yy,
+                circle2.xx,
+                circle2.yy
             );
 
             if (distance2 < bothRadii * bothRadii) {
                 if (window.visualDebugging) {
                     var collisionPointCircle = canvasUtil.circle(
-                        (circle1.x * circle2.radius +
-                            circle2.x * circle1.radius) /
+                        (circle1.xx * circle2.radius +
+                            circle2.xx * circle1.radius) /
                             bothRadii,
-                        (circle1.y * circle2.radius +
-                            circle2.y * circle1.radius) /
+                        (circle1.yy * circle2.radius +
+                            circle2.yy * circle1.radius) /
                             bothRadii,
                         5
                     );

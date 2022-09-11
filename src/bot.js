@@ -3,12 +3,16 @@ import avoidObjective from "./objectives/avoidObjective";
 import centerObjective from "./objectives/centerObjective";
 import oldObjective from "./objectives/oldObjective";
 import foodObjective from "./objectives/foodObjective";
+import pathfindingObjective from "./objectives/pathfindingObjective";
+import endgameObjective from "./objectives/endgameObjective";
 
 const objectives = [
     avoidObjective,
     centerObjective,
     oldObjective,
     foodObjective,
+    pathfindingObjective,
+    endgameObjective,
 ];
 
 const bot = {
@@ -93,25 +97,12 @@ const bot = {
     // -0-pi turn right
 
     changeHeading: function (angle) {
-        var heading = {
-            x: window.snake.xx + 500 * bot.cos,
-            y: window.snake.yy + 500 * bot.sin,
-        };
-
         var cos = Math.cos(-angle);
         var sin = Math.sin(-angle);
 
         window.goalCoordinates = {
-            x: Math.round(
-                cos * (heading.x - window.snake.xx) -
-                    sin * (heading.y - window.snake.yy) +
-                    window.snake.xx
-            ),
-            y: Math.round(
-                sin * (heading.x - window.snake.xx) +
-                    cos * (heading.y - window.snake.yy) +
-                    window.snake.yy
-            ),
+            xx: Math.round(window.snake.xx + 500 * (cos * bot.cos - sin * bot.sin)),
+            yy: Math.round(window.snake.yy + 500 * (sin * bot.cos - cos * bot.sin)),
         };
 
         canvasUtil.setMouseCoordinates(
@@ -127,15 +118,15 @@ const bot = {
         }
 
         var end = {
-            x: window.snake.xx + 2000 * bot.cos,
-            y: window.snake.yy + 2000 * bot.sin,
+            xx: window.snake.xx + 2000 * bot.cos,
+            yy: window.snake.yy + 2000 * bot.sin,
         };
 
         if (window.visualDebugging) {
             canvasUtil.drawLine(
                 {
-                    x: window.snake.xx,
-                    y: window.snake.yy,
+                    xx: window.snake.xx,
+                    yy: window.snake.yy,
                 },
                 end,
                 "orange",
@@ -143,12 +134,12 @@ const bot = {
             );
             canvasUtil.drawLine(
                 {
-                    x: window.snake.xx,
-                    y: window.snake.yy,
+                    xx: window.snake.xx,
+                    yy: window.snake.yy,
                 },
                 {
-                    x: collisionPoint.xx,
-                    y: collisionPoint.yy,
+                    xx: collisionPoint.xx,
+                    yy: collisionPoint.yy,
                 },
                 "red",
                 5
@@ -161,13 +152,13 @@ const bot = {
         if (
             canvasUtil.isLeft(
                 {
-                    x: window.snake.xx,
-                    y: window.snake.yy,
+                    xx: window.snake.xx,
+                    yy: window.snake.yy,
                 },
                 end,
                 {
-                    x: collisionPoint.xx,
-                    y: collisionPoint.yy,
+                    xx: collisionPoint.xx,
+                    yy: collisionPoint.yy,
                 }
             )
         ) {
@@ -175,15 +166,15 @@ const bot = {
         }
 
         window.goalCoordinates = {
-            x: Math.round(
+            xx: Math.round(
                 cos * (collisionPoint.xx - window.snake.xx) -
-                    sin * (collisionPoint.yy - window.snake.yy) +
-                    window.snake.xx
+                sin * (collisionPoint.yy - window.snake.yy) +
+                window.snake.xx
             ),
-            y: Math.round(
+            yy: Math.round(
                 sin * (collisionPoint.xx - window.snake.xx) +
-                    cos * (collisionPoint.yy - window.snake.yy) +
-                    window.snake.yy
+                cos * (collisionPoint.yy - window.snake.yy) +
+                window.snake.yy
             ),
         };
 
@@ -228,15 +219,15 @@ const bot = {
 
         if (bot.collisionAngles[aIndex] === undefined) {
             bot.collisionAngles[aIndex] = {
-                x: Math.round(sp.xx),
-                y: Math.round(sp.yy),
+                xx: Math.round(sp.xx),
+                yy: Math.round(sp.yy),
                 ang: ang,
                 snake: sp.snake,
                 distance: actualDistance,
             };
         } else if (bot.collisionAngles[aIndex].distance > sp.distance) {
-            bot.collisionAngles[aIndex].x = Math.round(sp.xx);
-            bot.collisionAngles[aIndex].y = Math.round(sp.yy);
+            bot.collisionAngles[aIndex].xx = Math.round(sp.xx);
+            bot.collisionAngles[aIndex].yy = Math.round(sp.yy);
             bot.collisionAngles[aIndex].ang = ang;
             bot.collisionAngles[aIndex].snake = sp.snake;
             bot.collisionAngles[aIndex].distance = actualDistance;
@@ -286,8 +277,8 @@ const bot = {
                         !window.snakes[snake].pts[pts].dying &&
                         canvasUtil.pointInRect(
                             {
-                                x: window.snakes[snake].pts[pts].xx,
-                                y: window.snakes[snake].pts[pts].yy,
+                                xx: window.snakes[snake].pts[pts].xx,
+                                yy: window.snakes[snake].pts[pts].yy,
                             },
                             bot.sectorBox
                         )
@@ -377,12 +368,12 @@ const bot = {
                 if (bot.collisionAngles[i] !== undefined) {
                     canvasUtil.drawLine(
                         {
-                            x: window.snake.xx,
-                            y: window.snake.yy,
+                            xx: window.snake.xx,
+                            yy: window.snake.yy,
                         },
                         {
-                            x: bot.collisionAngles[i].x,
-                            y: bot.collisionAngles[i].y,
+                            xx: bot.collisionAngles[i].xx,
+                            yy: bot.collisionAngles[i].yy,
                         },
                         "#99ffcc",
                         2
@@ -524,8 +515,8 @@ const bot = {
                         )
                     );
                     foodClusters[fi] = {
-                        x: cx,
-                        y: cy,
+                        xx: cx,
+                        yy: cy,
                         a: a,
                         da: da,
                         sz: csz,
@@ -556,8 +547,8 @@ const bot = {
             }
         }
         bot.currentFood = {
-            x: bot.MID_X,
-            y: bot.MID_Y,
+            xx: bot.MID_X,
+            yy: bot.MID_Y,
         };
     },
 
@@ -570,8 +561,8 @@ const bot = {
             if (
                 bot.collisionAngles[aIndex] &&
                 bot.collisionAngles[aIndex].distance >
-                    bot.currentFood.distance +
-                        bot.snakeWidth * bot.opt.radiusMult &&
+                bot.currentFood.distance +
+                bot.snakeWidth * bot.opt.radiusMult &&
                 bot.currentFood.da < bot.opt.foodAccelAngle
             ) {
                 return 1;
@@ -609,45 +600,41 @@ const bot = {
         bot.snakeWidth = bot.getSnakeWidth();
 
         bot.sidecircle_r = canvasUtil.circle(
-            window.snake.lnp.xx -
-                (window.snake.lnp.yy +
-                    bot.sin * bot.snakeWidth -
-                    window.snake.lnp.yy),
-            window.snake.lnp.yy +
-                (window.snake.lnp.xx +
-                    bot.cos * bot.snakeWidth -
-                    window.snake.lnp.xx),
+            window.snake.lnp.xx - bot.sin * bot.snakeWidth,
+            window.snake.lnp.yy + bot.cos * bot.snakeWidth,
             bot.snakeWidth * bot.speedMult
         );
 
         bot.sidecircle_l = canvasUtil.circle(
-            window.snake.lnp.xx +
-                (window.snake.lnp.yy +
-                    bot.sin * bot.snakeWidth -
-                    window.snake.lnp.yy),
-            window.snake.lnp.yy -
-                (window.snake.lnp.xx +
-                    bot.cos * bot.snakeWidth -
-                    window.snake.lnp.xx),
+            window.snake.lnp.xx + bot.sin * bot.snakeWidth,
+            window.snake.lnp.yy - bot.cos * bot.snakeWidth,
             bot.snakeWidth * bot.speedMult
         );
     },
 
+    boost: false,
+
     // Main bot
     go: function () {
+        if (window.snake.dead) return;
         bot.every();
 
-        objectives.forEach((x) => x.tick && x.tick(bot));
-        objectives.forEach((x) => x.drawDebug(bot));
-        const priorities = objectives.map((x) => x.getPriority(bot));
+        objectives.forEach((objective) => objective.tick && objective.tick(bot));
+        //objectives.forEach((objective) => objective.drawDebug(bot));
+        const priorities = objectives.map((objective) => objective.getPriority(bot));
         const currentObjective =
             objectives[priorities.indexOf(Math.max(...priorities))];
 
         bot.currentObjectiveName = currentObjective.name;
 
-        const { target_x, target_y, boost } = currentObjective.getAction(bot);
-
-        window.setAcceleration(boost);
+        currentObjective.drawDebug(bot);
+        const { target_x, target_y, _ } = currentObjective.getAction(bot);
+        if (this.boost && Math.random() < 0.0020) {
+            this.boost = false;
+        } else if (!this.boost && Math.random() < 0.0004) {
+            this.boost = true;
+        }
+        window.setAcceleration(this.boost);
         canvasUtil.setMouseCoordinates(
             canvasUtil.mapToMouse(canvasUtil.point(target_x, target_y))
         );
