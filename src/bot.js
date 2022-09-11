@@ -4,13 +4,15 @@ import centerObjective from "./objectives/centerObjective";
 import oldObjective from "./objectives/oldObjective";
 import foodObjective from "./objectives/foodObjective";
 import pathfindingObjective from "./objectives/pathfindingObjective";
+import endgameObjective from "./objectives/endgameObjective";
 
 const objectives = [
     avoidObjective,
     centerObjective,
     oldObjective,
     foodObjective,
-    pathfindingObjective
+    pathfindingObjective,
+    endgameObjective,
 ];
 
 const bot = {
