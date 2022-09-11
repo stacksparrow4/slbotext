@@ -16,6 +16,7 @@ const SEARCH_REPS = isLong ? 300 : 10;
 
 // how long each path is valid for (milliseconds)
 const PATH_DURATION = isLong ? 2000 : 1200;
+const GRID_DURATION = 100;
 
 const MAX_ROTATION = (52 * Math.PI) / 180;
 
@@ -23,11 +24,16 @@ const MAX_ROTATION = (52 * Math.PI) / 180;
 const BASE_SPEED = 0.185;
 const BOOST_SPEED = 0.448;
 
+function clamp(x, a, b) {
+    return x > b ? b : x < a ? a : x;
+}
+
 const pathfindingObjective = {
     name: "PATH FINDING",
     path: [],
     stepSize: 0,
     pathTime: 0,
+    nextGridUpdate: 0,
     grid: [],
 
     getPriority: function () {
@@ -133,15 +139,15 @@ const pathfindingObjective = {
         let currPath = [{ xx: currPos.xx, yy: currPos.yy }];
 
         for (let i = 0; i < PATH_SIZE; ++i) {
+            // generate new angle
+            // float in range [-rotation, rotation]
+            currAng += (Math.random() - 0.5) * 2 * MAX_ROTATION;
+
             // update position
             currPos.xx += stepSize * Math.cos(currAng);
             currPos.yy += stepSize * Math.sin(currAng);
             // ahhhhh copy by reference is so annoying
             currPath.push({ xx: currPos.xx, yy: currPos.yy });
-
-            // generate new angle
-            // float in range [-rotation, rotation]
-            currAng += (Math.random() - 0.5) * 2 * MAX_ROTATION;
         }
         return currPath;
     },
@@ -152,7 +158,7 @@ const pathfindingObjective = {
         }
 
         let currScore = 0;
-        for (let i = 0; i < PATH_SIZE; ++i) {
+        for (let i = 0; i < path.length; ++i) {
             const currPos = path[i];
             // check for bad, set currScore to -Infinity
             // check for good, increment score by goodness
@@ -163,7 +169,7 @@ const pathfindingObjective = {
         return currScore;
     },
 
-    findBestPath: function (forceChange) {
+    findNewPath: function (forceChange) {
         // derived from bot.sidecircle_r
         const TURNING_RADIUS = bot.snakeWidth * bot.speedMult;
         const STEP_SIZE = 2 * TURNING_RADIUS;
@@ -195,6 +201,92 @@ const pathfindingObjective = {
         }
     },
 
+    // Try and modify path to make it better
+    correctPath: function () {
+        for (let i = 3; i < this.path.length; i++) {
+            const { yy: curryy, xx: currxx } = this.path[i];
+            const { yy: prevyy, xx: prevxx } = this.path[i - 1];
+            const { yy: prevPrevyy, xx: prevPrevxx } = this.path[i - 2];
+            const currAng = Math.atan2(curryy - prevyy, currxx - prevxx);
+            const prevAng = Math.atan2(
+                prevyy - prevPrevyy,
+                prevxx - prevPrevxx
+            );
+
+            let bestScore = this.findScore(this.path.slice(0, i + 1));
+            let bestPoint = {
+                xx: currxx,
+                yy: curryy,
+            };
+            for (
+                let dAng = -Math.PI / 10;
+                dAng <= Math.PI / 10;
+                dAng += Math.PI / 48
+            ) {
+                const newAng = clamp(
+                    currAng + dAng,
+                    prevAng - MAX_ROTATION,
+                    prevAng + MAX_ROTATION
+                );
+                const newPathPoint = {
+                    xx: prevxx + this.stepSize * Math.cos(newAng),
+                    yy: prevyy + this.stepSize * Math.sin(newAng),
+                };
+
+                const newPathScore = this.findScore([
+                    ...this.path.slice(0, i),
+                    newPathPoint,
+                ]);
+
+                if (newPathScore > bestScore) {
+                    bestScore = newPathScore;
+                    bestPoint = newPathPoint;
+                }
+            }
+
+            this.path[i] = bestPoint;
+        }
+    },
+
+    appendPath: function () {
+        while (this.path.length < PATH_SIZE) {
+            const last = this.path[this.path.length - 1];
+            const secondLast = this.path[this.path.length - 2];
+            const ang = Math.atan2(
+                last.yy - secondLast.yy,
+                last.xx - secondLast.xx
+            );
+
+            let bestScore = -Infinity;
+            let bestPoint = {
+                xx: last.xx + this.stepSize * Math.cos(ang),
+                yy: last.yy + this.stepSize * Math.sin(ang),
+            };
+            for (
+                let testAng = ang - MAX_ROTATION;
+                testAng <= ang + MAX_ROTATION;
+                testAng += MAX_ROTATION / 4
+            ) {
+                const newPathPoint = {
+                    xx: last.xx + this.stepSize * Math.cos(testAng),
+                    yy: last.yy + this.stepSize * Math.sin(testAng),
+                };
+
+                const newPathScore = this.findScore([
+                    ...this.path,
+                    newPathPoint,
+                ]);
+
+                if (newPathScore > bestScore) {
+                    bestScore = newPathScore;
+                    bestPoint = newPathPoint;
+                }
+            }
+
+            this.path.push(bestPoint);
+        }
+    },
+
     // look at this.path and determine next target point
     findCurrI: function () {
         // this is the orignal dumb way - your progress increases linearly with time
@@ -219,11 +311,27 @@ const pathfindingObjective = {
     },
 
     getAction: function () {
-        let currI = this.findCurrI();
-        if (this.pathTime < Date.now() - PATH_DURATION || currI >= PATH_SIZE) {
+        // Update grid periodically
+        if (Date.now() > this.nextGridUpdate) {
+            this.nextGridUpdate = Date.now() + GRID_DURATION;
             this.genGrid();
-            this.findBestPath(currI >= PATH_SIZE);
+        }
+
+        let currI = this.findCurrI();
+
+        // TODO: also refresh if the path is bad (ie runs into snake)
+        if (this.path.length === 0 || currI >= this.path.length) {
+            this.findNewPath();
             currI = this.findCurrI();
+        }
+
+        this.correctPath();
+        this.appendPath();
+
+        // Prune start of path
+        while (currI > 3) {
+            this.path.splice(0, 1);
+            currI--;
         }
 
         // find currI - the next point to aim for along the path
