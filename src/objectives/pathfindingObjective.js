@@ -196,9 +196,10 @@ const pathfindingObjective = {
             else console.log("unforced change");
 
             this.path = bestPath;
-            this.pathTime = Date.now();
             this.stepSize = STEP_SIZE;
         }
+
+        this.pathTime = Date.now() + PATH_DURATION;
     },
 
     // Try and modify path to make it better
@@ -244,6 +245,17 @@ const pathfindingObjective = {
                 }
             }
 
+            if (bestScore < 0) {
+                const prevPath = this.path;
+                for (let attempt = 0; attempt < 20; attempt++) {
+                    this.findNewPath(true);
+                    if (this.path.length !== 0) return;
+                }
+                console.log("WE'RE DOOMED 💀💀💀");
+                this.path = prevPath;
+                return;
+            }
+
             this.path[i] = bestPoint;
         }
     },
@@ -257,11 +269,11 @@ const pathfindingObjective = {
                 last.xx - secondLast.xx
             );
 
-            let bestScore = -Infinity;
             let bestPoint = {
                 xx: last.xx + this.stepSize * Math.cos(ang),
                 yy: last.yy + this.stepSize * Math.sin(ang),
             };
+            let bestScore = this.findScore([...this.path, bestPoint]);
             for (
                 let testAng = ang - MAX_ROTATION;
                 testAng <= ang + MAX_ROTATION;
@@ -289,25 +301,22 @@ const pathfindingObjective = {
 
     // look at this.path and determine next target point
     findCurrI: function () {
-        // this is the orignal dumb way - your progress increases linearly with time
-        // this doesnt account for boosts
-        //return Math.ceil(BASE_SPEED * (Date.now() - this.pathTime) / this.stepSize);
+        // Find the first point that is not behind the snake.
+        for (let i = 0; i < this.path.length; i++) {
+            const relX = this.path[i].xx - window.snake.xx;
+            const relY = this.path[i].yy - window.snake.yy;
 
-        // find cloest point and aim for the "next" point
-        // TODO: this very much breaks when the path is self intersecting, or
-        // close the being self intersecting
-        let bestI = 0;
-        for (let i = 1; i < this.path.length; i++) {
-            if (
-                distanceBetween2(window.snake, this.path[i]) <
-                distanceBetween2(window.snake, this.path[bestI])
-            ) {
-                bestI = i;
+            const dotProduct =
+                Math.cos(window.snake.ang) * relX +
+                Math.sin(window.snake.ang) * relY;
+
+            if (dotProduct > 0) {
+                return i + 1;
             }
         }
 
-        // +2 adds some smoothing to make snake movements seem natural
-        return bestI + 2;
+        // Sometimes happens due to lag
+        return 0;
     },
 
     getAction: function () {
@@ -319,20 +328,26 @@ const pathfindingObjective = {
 
         let currI = this.findCurrI();
 
-        // TODO: also refresh if the path is bad (ie runs into snake)
-        if (this.path.length === 0 || currI >= this.path.length) {
+        if (
+            this.path.length === 0 ||
+            currI >= this.path.length ||
+            Date.now() > this.pathTime
+        ) {
             this.findNewPath();
-            currI = this.findCurrI();
         }
 
         this.correctPath();
         this.appendPath();
+
+        currI = this.findCurrI();
 
         // Prune start of path
         while (currI > 3) {
             this.path.splice(0, 1);
             currI--;
         }
+
+        if (currI < 0 || currI >= this.path.length) debugger;
 
         // find currI - the next point to aim for along the path
         return {
