@@ -5,6 +5,17 @@
 
     "description": "Slitherio bot",
 
+    "permissions": ["declarativeNetRequest"],
+    "declarative_net_request": {
+        "rule_resources": [
+            {
+                "id": "block_slither_https",
+                "enabled": true,
+                "path": "block_https.json"
+            }
+        ]
+    },
+
     "content_scripts": [
         {
             "matches": ["http://slither.io/"],
