@@ -126,7 +126,7 @@ const avoidObjective = {
     getPriority: function () {
         const { val } = this.gradFunc(window.snake);
         const normalised = val / ENABLE_THRESHOLD;
-        return Math.max(-0.9, Math.min(0.9, normalised));
+        return Math.max(-1, Math.min(1, normalised));
         //return 100;
     },
 
