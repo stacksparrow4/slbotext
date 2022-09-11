@@ -8,7 +8,7 @@ const isLong = true;
 
 // consider this.grid cells of size CELL_SIZE x CELL_SIZE
 // TODO: CELL_SIZE varies with your turn radius
-const CELL_SIZE = 50;
+const CELL_SIZE = 100;
 
 // constants for path search
 const PATH_SIZE = isLong ? 20 : 6;
@@ -17,7 +17,7 @@ const SEARCH_REPS = isLong ? 300 : 10;
 // how long each path is valid for (milliseconds)
 const PATH_DURATION = isLong ? 2000 : 1200;
 
-const MAX_ROTATION = 52 * Math.PI / 180;
+const MAX_ROTATION = (52 * Math.PI) / 180;
 
 // in pixels per millisecond
 const BASE_SPEED = 0.185;
@@ -44,12 +44,15 @@ const pathfindingObjective = {
     posToRegion: function (pos) {
         return {
             xx: Math.floor(pos.xx / CELL_SIZE) * CELL_SIZE,
-            yy: Math.floor(pos.yy / CELL_SIZE) * CELL_SIZE
+            yy: Math.floor(pos.yy / CELL_SIZE) * CELL_SIZE,
         };
     },
 
     inBounds: function (pos) {
-        return Math.abs(pos.xx - window.snake.xx) < this.visibleSize() && Math.abs(pos.yy - window.snake.yy) < this.visibleSize()
+        return (
+            Math.abs(pos.xx - window.snake.xx) < this.visibleSize() &&
+            Math.abs(pos.yy - window.snake.yy) < this.visibleSize()
+        );
     },
 
     addIndication: function (pos, score) {
@@ -60,7 +63,11 @@ const pathfindingObjective = {
             const regionyy = this.posToRegion(pos).yy;
             this.grid[regionxx] = this.grid[regionxx] || [];
             this.grid[regionxx][regionyy] = this.grid[regionxx][regionyy] || [];
-            this.grid[regionxx][regionyy].push({ xx: pos.xx, yy: pos.yy, score: score });
+            this.grid[regionxx][regionyy].push({
+                xx: pos.xx,
+                yy: pos.yy,
+                score: score,
+            });
         }
     },
 
@@ -70,9 +77,21 @@ const pathfindingObjective = {
         const regionxx = this.posToRegion(pos).xx;
         const regionyy = this.posToRegion(pos).yy;
         if (this.grid[regionxx] && this.grid[regionxx][regionyy]) {
-            for (const indication of this.grid[regionxx][regionyy]) {
-                if (distanceBetween2(indication, pos) <= dist * dist) {
-                    total += indication.score;
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    if (dx === 0 && dy === 0) continue;
+
+                    const currxx = regionxx + CELL_SIZE * dx;
+                    const curryy = regionyy + CELL_SIZE * dy;
+
+                    if (!this.grid[currxx] || !this.grid[currxx][curryy])
+                        continue;
+
+                    for (const indication of this.grid[currxx][curryy]) {
+                        if (distanceBetween2(indication, pos) <= dist * dist) {
+                            total += indication.score;
+                        }
+                    }
                 }
             }
         }
@@ -138,7 +157,8 @@ const pathfindingObjective = {
             // check for bad, set currScore to -Infinity
             // check for good, increment score by goodness
             // assuming can only collect food and collide with snakes within a radius of 100
-            currScore += Math.sqrt(PATH_SIZE - i) * this.getIndication(currPos, 100);
+            currScore +=
+                Math.sqrt(PATH_SIZE - i) * this.getIndication(currPos, 100);
         }
         return currScore;
     },
@@ -186,11 +206,14 @@ const pathfindingObjective = {
         // close the being self intersecting
         let bestI = 0;
         for (let i = 1; i < this.path.length; i++) {
-            if (distanceBetween2(window.snake, this.path[i]) < distanceBetween2(window.snake, this.path[bestI])) {
+            if (
+                distanceBetween2(window.snake, this.path[i]) <
+                distanceBetween2(window.snake, this.path[bestI])
+            ) {
                 bestI = i;
             }
         }
-        
+
         // +2 adds some smoothing to make snake movements seem natural
         return bestI + 2;
     },
