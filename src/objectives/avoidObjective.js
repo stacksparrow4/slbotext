@@ -18,7 +18,7 @@ const FRONT_MULT = 9;
 // magnitude of attraction
 const FRONT_MAGNITUDE = 3;
 
-const ENABLE_THRESHOLD = -1e-10;
+const ENABLE_THRESHOLD = -5e-10;
 
 const DEBUG_GAP = 50;
 const DEBUG_RAD = DEBUG_GAP * 10;
@@ -108,7 +108,7 @@ const avoidObjective = {
 
     getAction: function () {
         const { dx, dy, val } = this.gradFunc(window.snake);
-        console.log(val);
+        //console.log(val);
 
         const len = Math.sqrt(
             Math.pow(dx, 2) + Math.pow(dy, 2)

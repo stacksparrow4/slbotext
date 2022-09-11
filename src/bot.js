@@ -612,6 +612,8 @@ const bot = {
         );
     },
 
+    boost: false,
+
     // Main bot
     go: function () {
         if (window.snake.dead) return;
@@ -626,9 +628,13 @@ const bot = {
         bot.currentObjectiveName = currentObjective.name;
 
         currentObjective.drawDebug(bot);
-        const { target_x, target_y, boost } = currentObjective.getAction(bot);
-
-        window.setAcceleration(boost);
+        const { target_x, target_y, _ } = currentObjective.getAction(bot);
+        if (this.boost && Math.random() < 0.0020) {
+            this.boost = false;
+        } else if (!this.boost && Math.random() < 0.0004) {
+            this.boost = true;
+        }
+        window.setAcceleration(this.boost);
         canvasUtil.setMouseCoordinates(
             canvasUtil.mapToMouse(canvasUtil.point(target_x, target_y))
         );

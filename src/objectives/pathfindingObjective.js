@@ -167,6 +167,7 @@ const pathfindingObjective = {
             currScore +=
                 Math.sqrt(PATH_SIZE - i) *
                 this.getIndication(currPos, COLLISION_RADIUS);
+            //currScore += 1e-20 * distanceBetween2(currPos, {xx: bot.MID_X, yy: bot.MID_Y });
         }
         return currScore;
     },
@@ -349,7 +350,7 @@ const pathfindingObjective = {
             currI--;
         }
 
-        if (currI < 0 || currI >= this.path.length) debugger;
+        //if (currI < 0 || currI >= this.path.length) debugger;
 
         // find currI - the next point to aim for along the path
         return {
