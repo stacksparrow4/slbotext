@@ -8,7 +8,8 @@ const isLong = true;
 
 // consider this.grid cells of size CELL_SIZE x CELL_SIZE
 // TODO: CELL_SIZE varies with your turn radius
-const CELL_SIZE = 100;
+const CELL_SIZE = 50;
+const COLLISION_RADIUS = 70;
 
 // constants for path search
 const PATH_SIZE = isLong ? 20 : 6;
@@ -162,9 +163,9 @@ const pathfindingObjective = {
             const currPos = path[i];
             // check for bad, set currScore to -Infinity
             // check for good, increment score by goodness
-            // assuming can only collect food and collide with snakes within a radius of 100
             currScore +=
-                Math.sqrt(PATH_SIZE - i) * this.getIndication(currPos, 100);
+                Math.sqrt(PATH_SIZE - i) *
+                this.getIndication(currPos, COLLISION_RADIUS);
         }
         return currScore;
     },
