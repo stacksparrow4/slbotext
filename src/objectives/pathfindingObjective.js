@@ -38,7 +38,7 @@ const pathfindingObjective = {
     grid: [],
 
     getPriority: function () {
-        //return 0.7;
+        return 0.7;
         //return 10000;
         return -1000; // just for the sake of testing other stuff
     },

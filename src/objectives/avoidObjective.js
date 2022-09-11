@@ -68,18 +68,18 @@ const getPointGradientFunction = () => {
             .filter(point => (point.dist <= VISIBLE_DIST * VISIBLE_DIST));
 
         // e^(-r^2) * (x cos theta + y sin theta)
-        for (const target of targets) {
-            // TODO: condition to determine if kill is suitable
-            // e.g. visible map not dense, mass large enough to boost, mass not to large to be clumsy, reasonably close to the snake
-            if (target.dist <= ATTACK_DIST * ATTACK_DIST) {
-                const r = target.radius * FRONT_MULT;
-                const expr1 = FRONT_MAGNITUDE * Math.exp(target.dist / (-r * r));
-                const expr2 = -target.xx * Math.cos(target.ang) + -target.yy * Math.sin(target.ang);
-                val += expr1 * expr2;
-                dx += expr1 * (Math.cos(target.ang) - 2 * target.xx / (-r * r) * expr2);
-                dy += expr1 * (Math.sin(target.ang) - 2 * target.yy / (-r * r) * expr2);
-            }
-        }
+        // for (const target of targets) {
+        //     // TODO: condition to determine if kill is suitable
+        //     // e.g. visible map not dense, mass large enough to boost, mass not to large to be clumsy, reasonably close to the snake
+        //     if (target.dist <= ATTACK_DIST * ATTACK_DIST) {
+        //         const r = target.radius * FRONT_MULT;
+        //         const expr1 = FRONT_MAGNITUDE * Math.exp(target.dist / (-r * r));
+        //         const expr2 = -target.xx * Math.cos(target.ang) + -target.yy * Math.sin(target.ang);
+        //         val += expr1 * expr2;
+        //         dx += expr1 * (Math.cos(target.ang) - 2 * target.xx / (-r * r) * expr2);
+        //         dy += expr1 * (Math.sin(target.ang) - 2 * target.yy / (-r * r) * expr2);
+        //     }
+        // }
 
         // -r^(-6)
         for (const avoid of avoids) {
